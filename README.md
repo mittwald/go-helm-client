@@ -8,7 +8,7 @@ This library is build upon `helm/v3.1.2`
 ```go
 import "github.com/mittwald/go-helm-client/pkg/helm"
 ```
-Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases ([example](./cmd/example/main.go)):
+Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases:
 ```go 
 package main
 
