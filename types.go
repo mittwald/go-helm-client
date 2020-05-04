@@ -1,4 +1,4 @@
-package go_helm_client
+package helmclient
 
 import (
 	"time"
@@ -13,19 +13,19 @@ import (
 
 // KubeConfClientOptions defines the options used for constructing a client via kubeconfig
 type KubeConfClientOptions struct {
-	*ClientOptions
+	*Options
 	KubeContext string
 	KubeConfig  []byte
 }
 
 // RestConfClientOptions defines the options used for constructing a client via REST config
 type RestConfClientOptions struct {
-	*ClientOptions
+	*Options
 	RestConfig *rest.Config
 }
 
-// ClientOptions defines the options of a client
-type ClientOptions struct {
+// Options defines the options of a client
+type Options struct {
 	Namespace        string
 	RepositoryConfig string
 	RepositoryCache  string
