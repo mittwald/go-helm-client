@@ -21,9 +21,7 @@ func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.C
 	}
 }
 
-// ToRESTConfig
-//
-// Return a REST config build from a given kubeconfig
+// ToRESTConfig returns a REST config build from a given kubeconfig
 func (c *RESTClientGetter) ToRESTConfig() (*rest.Config, error) {
 	if c.restConfig != nil {
 		return c.restConfig, nil

@@ -4,9 +4,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// GetValuesMap
-//
-// Return the mapped out values of a chart
+// GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 	var values map[string]interface{}
 

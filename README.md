@@ -9,14 +9,14 @@ This library is build upon `helm/v3.1.2` and available under the MIT License:
 ## Usage
 
 ```go
-import helmclient "github.com/mittwald/go-helm-client"
+import "github.com/mittwald/go-helm-client"
 ```
 Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases:
 ```go 
 package main
 
 import (
-	helmclient "github.com/mittwald/go-helm-client"
+	"github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
