@@ -34,7 +34,7 @@ const (
 // New
 //
 // Wrapper function returning a new Helm client
-func New(options *ClientOptions) (*Client, error) {
+func New(options *Options) (*Client, error) {
 	settings := cli.New()
 
 	err := setEnvSettings(options, settings)
@@ -55,7 +55,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions) (*Client, error) {
 	}
 
 	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil)
-	err := setEnvSettings(options.ClientOptions, settings)
+	err := setEnvSettings(options.Options, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions) (*Client, error) {
 		settings.KubeContext = options.KubeContext
 	}
 
-	return newClient(options.ClientOptions, clientGetter, settings)
+	return newClient(options.Options, clientGetter, settings)
 }
 
 // NewClientFromRestConf
@@ -75,18 +75,18 @@ func NewClientFromRestConf(options *RestConfClientOptions) (*Client, error) {
 
 	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig)
 
-	err := setEnvSettings(options.ClientOptions, settings)
+	err := setEnvSettings(options.Options, settings)
 	if err != nil {
 		return nil, err
 	}
 
-	return newClient(options.ClientOptions, clientGetter, settings)
+	return newClient(options.Options, clientGetter, settings)
 }
 
 // newClient
 //
 // Return a new Helm client
-func newClient(options *ClientOptions, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*Client, error) {
+func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*Client, error) {
 	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
@@ -117,9 +117,9 @@ func newClient(options *ClientOptions, clientGetter genericclioptions.RESTClient
 // setEnvSettings
 //
 // Set the client's environment settings based on the provided client configuration
-func setEnvSettings(options *ClientOptions, settings *cli.EnvSettings) error {
+func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 	if options == nil {
-		options = &ClientOptions{
+		options = &Options{
 			RepositoryConfig: defaultRepositoryConfigPath,
 			RepositoryCache:  defaultCachePath,
 			Linting:          true,
