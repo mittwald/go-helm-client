@@ -2,24 +2,27 @@
 
 Go client library for accessing [Helm](https://github.com/helm/helm), enabling the user to programmatically change helm charts and releases.
                                                                                                                          
-This library is build upon `helm/v3.1.2`
+This library is build upon `helm/v3.1.2` and available under the MIT License:
+ 
+[![GitHub license](https://img.shields.io/github/license/mittwald/go-helm-client.svg)](https://github.com/mittwald/go-helm-client/blob/master/LICENSE)
+
 ## Usage
 
 ```go
-import "github.com/mittwald/go-helm-client"
+import helmclient "github.com/mittwald/go-helm-client"
 ```
 Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases:
 ```go 
 package main
 
 import (
-	"github.com/mittwald/go-helm-client"
+	helmclient "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
 func main() {
 	// Create a client
-	helmClient, err := helm.NewClient(&helm.ClientOptions{
+	helmClient, err := helmclient.New(&helmclient.Options{
 		RepositoryCache:  "/tmp/.helmcache",
 		RepositoryConfig: "/tmp/.helmrepo",
 		Debug:            true,
@@ -39,7 +42,7 @@ func main() {
 	}
 
 	// Define the chart you want to install
-	chartSpec := helm.ChartSpec{
+	chartSpec := helmclient.ChartSpec{
 		ReleaseName: "etcd-operator",
 		ChartName:   "stable/etcd-operator",
 		Namespace:   "default",
@@ -56,12 +59,12 @@ func main() {
 
 Alternatively, you can create a client via REST config: 
 ```go
-helmClient, err := helm.NewClientFromRestConf(&restClientOpts)
+helmClient, err := helmclient.NewClientFromRestConf(&restClientOpts)
 ```
 or via Kubeconfig:
 
 ```go
-helmClient, err := helm.NewClientFromKubeConf()
+helmClient, err := helmclient.NewClientFromKubeConf()
 ```
 
 #### Private chart repository
@@ -75,3 +78,6 @@ err := helmClient.AddOrUpdateChartRepo(repo.Entry{
     Password: "bar",
 })
 ```
+
+## Documentation
+For more specific documentation, please refer to the [godoc](https://pkg.go.dev/github.com/mittwald/go-helm-client/) of this library

@@ -1,4 +1,4 @@
-package go_helm_client
+package helmclient
 
 import (
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -9,8 +9,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
 
+// NewRESTClientGetter
+//
+// source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
 func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config) *RESTClientGetter {
 	return &RESTClientGetter{
 		namespace:  namespace,
@@ -19,6 +21,9 @@ func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.C
 	}
 }
 
+// ToRESTConfig
+//
+// Return a REST config build from a given kubeconfig
 func (c *RESTClientGetter) ToRESTConfig() (*rest.Config, error) {
 	if c.restConfig != nil {
 		return c.restConfig, nil

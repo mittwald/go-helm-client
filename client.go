@@ -1,4 +1,4 @@
-package go_helm_client
+package helmclient
 
 import (
 	"bytes"
@@ -45,10 +45,10 @@ const (
 	defaultRepositoryConfigPath = "/tmp/.helmrepo"
 )
 
-// NewClient
+// New
 //
 // Wrapper function returning a new Helm client
-func NewClient(options *ClientOptions) (*Client, error) {
+func New(options *ClientOptions) (*Client, error) {
 	settings := cli.New()
 
 	err := setEnvSettings(options, settings)
