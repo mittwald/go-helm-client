@@ -1,4 +1,4 @@
-package helm
+package go_helm_client
 
 import (
 	"k8s.io/apimachinery/pkg/api/meta"

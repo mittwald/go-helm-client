@@ -1,4 +1,4 @@
-package helm
+package go_helm_client
 
 import (
 	"time"
