@@ -7,35 +7,21 @@ import (
 	"log"
 	"os"
 
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-
-	apiextensionsV1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-
-	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-
-	"k8s.io/apimachinery/pkg/util/yaml"
-
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-
 	"github.com/spf13/pflag"
-
-	"helm.sh/helm/v3/pkg/getter"
-
-	"helm.sh/helm/v3/pkg/cli"
-
-	"helm.sh/helm/v3/pkg/downloader"
-
-	"helm.sh/helm/v3/pkg/chart"
-
-	"helm.sh/helm/v3/pkg/storage/driver"
-
-	"helm.sh/helm/v3/pkg/chart/loader"
-
 	"helm.sh/helm/v3/pkg/action"
-
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/downloader"
+	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/repo"
+	"helm.sh/helm/v3/pkg/storage/driver"
+	apiextensionsV1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
 var storage = repo.File{}
