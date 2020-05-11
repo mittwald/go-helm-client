@@ -3,11 +3,12 @@ package helmclient
 import (
 	"time"
 
+	"helm.sh/helm/v3/pkg/getter"
+
 	"k8s.io/client-go/rest"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -41,7 +42,7 @@ type RESTClientGetter struct {
 }
 
 // Client defines the values of a helm client
-type Client struct {
+type HelmClient struct {
 	Settings     *cli.EnvSettings
 	Providers    getter.Providers
 	storage      *repo.File

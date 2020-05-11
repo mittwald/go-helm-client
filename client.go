@@ -32,7 +32,7 @@ const (
 )
 
 // New returns a new Helm client with the provided options
-func New(options *Options) (*Client, error) {
+func New(options *Options) (*HelmClient, error) {
 	settings := cli.New()
 
 	err := setEnvSettings(options, settings)
@@ -44,7 +44,7 @@ func New(options *Options) (*Client, error) {
 }
 
 // NewClientFromKubeConf returns a new Helm client constructed with the provided kubeconfig options
-func NewClientFromKubeConf(options *KubeConfClientOptions) (*Client, error) {
+func NewClientFromKubeConf(options *KubeConfClientOptions) (*HelmClient, error) {
 	settings := cli.New()
 	if options.KubeConfig == nil {
 		return nil, fmt.Errorf("kubeconfig missing")
@@ -64,7 +64,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions) (*Client, error) {
 }
 
 // NewClientFromRestConf returns a new Helm client constructed with the provided REST config options
-func NewClientFromRestConf(options *RestConfClientOptions) (*Client, error) {
+func NewClientFromRestConf(options *RestConfClientOptions) (*HelmClient, error) {
 	settings := cli.New()
 
 	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig)
@@ -78,7 +78,7 @@ func NewClientFromRestConf(options *RestConfClientOptions) (*Client, error) {
 }
 
 // newClient returns a new Helm client via the provided options and REST config
-func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*Client, error) {
+func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*HelmClient, error) {
 	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		return nil, err
 	}
 
-	return &Client{
+	return &HelmClient{
 		Settings:     settings,
 		Providers:    getter.All(settings),
 		storage:      &storage,
@@ -143,7 +143,7 @@ func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 }
 
 // AddOrUpdateChartRepo adds or updates the provided helm chart repository
-func (c *Client) AddOrUpdateChartRepo(entry repo.Entry) error {
+func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 	chartRepo, err := repo.NewChartRepository(&entry, c.Providers)
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (c *Client) AddOrUpdateChartRepo(entry repo.Entry) error {
 }
 
 // UpdateChartRepos updates the list of chart repositories stored in the client's cache
-func (c *Client) UpdateChartRepos() error {
+func (c *HelmClient) UpdateChartRepos() error {
 	for _, entry := range c.storage.Repositories {
 		chartRepo, err := repo.NewChartRepository(entry, c.Providers)
 		if err != nil {
@@ -192,7 +192,7 @@ func (c *Client) UpdateChartRepos() error {
 
 // InstallOrUpgradeChart triggers the installation of the provided chart.
 // If the chart is already installed, trigger an upgrade instead
-func (c *Client) InstallOrUpgradeChart(spec *ChartSpec) error {
+func (c *HelmClient) InstallOrUpgradeChart(spec *ChartSpec) error {
 	installed, err := c.chartIsInstalled(spec.ReleaseName)
 	if err != nil {
 		return err
@@ -205,19 +205,19 @@ func (c *Client) InstallOrUpgradeChart(spec *ChartSpec) error {
 }
 
 // DeleteChartFromCache deletes the provided chart from the client's cache
-func (c *Client) DeleteChartFromCache(spec *ChartSpec) error {
+func (c *HelmClient) DeleteChartFromCache(spec *ChartSpec) error {
 	return c.deleteChartFromCache(spec)
 }
 
 // UninstallRelease uninstalls the provided release
-func (c *Client) UninstallRelease(spec *ChartSpec) error {
+func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 	return c.uninstallRelease(spec)
 }
 
 // install lints and installs the provided chart
-func (c *Client) install(spec *ChartSpec) error {
+func (c *HelmClient) install(spec *ChartSpec) error {
 	client := action.NewInstall(c.ActionConfig)
-	c.mergeInstallOptions(spec, client)
+	mergeInstallOptions(spec, client)
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -279,9 +279,9 @@ func (c *Client) install(spec *ChartSpec) error {
 }
 
 // upgrade upgrades a chart and CRDs
-func (c *Client) upgrade(spec *ChartSpec) error {
+func (c *HelmClient) upgrade(spec *ChartSpec) error {
 	client := action.NewUpgrade(c.ActionConfig)
-	c.mergeUpgradeOptions(spec, client)
+	mergeUpgradeOptions(spec, client)
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -329,7 +329,7 @@ func (c *Client) upgrade(spec *ChartSpec) error {
 }
 
 // deleteChartFromCache deletes the provided chart from the client's cache
-func (c *Client) deleteChartFromCache(spec *ChartSpec) error {
+func (c *HelmClient) deleteChartFromCache(spec *ChartSpec) error {
 	client := action.NewChartRemove(c.ActionConfig)
 
 	helmChart, _, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
@@ -349,10 +349,10 @@ func (c *Client) deleteChartFromCache(spec *ChartSpec) error {
 }
 
 // uninstallRelease uninstalls the provided release
-func (c *Client) uninstallRelease(spec *ChartSpec) error {
+func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 	client := action.NewUninstall(c.ActionConfig)
 
-	c.mergeUninstallReleaseOptions(spec, client)
+	mergeUninstallReleaseOptions(spec, client)
 
 	resp, err := client.Run(spec.ReleaseName)
 	if err != nil {
@@ -365,7 +365,7 @@ func (c *Client) uninstallRelease(spec *ChartSpec) error {
 }
 
 // lint lints a chart's values
-func (c *Client) lint(chartPath string, values map[string]interface{}) error {
+func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error {
 	client := action.NewLint()
 
 	result := client.Run([]string{chartPath}, values)
@@ -382,7 +382,7 @@ func (c *Client) lint(chartPath string, values map[string]interface{}) error {
 }
 
 // upgradeCRDs upgrades the CRDs of the provided chart
-func (c *Client) upgradeCRDs(chartInstance *chart.Chart) error {
+func (c *HelmClient) upgradeCRDs(chartInstance *chart.Chart) error {
 	cfg, err := c.Settings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
@@ -450,7 +450,7 @@ func (c *Client) upgradeCRDs(chartInstance *chart.Chart) error {
 }
 
 // getChart returns a chart matching the provided chart name and options
-func (c *Client) getChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
 	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
 	if err != nil {
 		return nil, "", err
@@ -469,7 +469,7 @@ func (c *Client) getChart(chartName string, chartPathOptions *action.ChartPathOp
 }
 
 // chartIsInstalled checks whether a chart is already installed or not by the provided release name
-func (c *Client) chartIsInstalled(release string) (bool, error) {
+func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	histClient := action.NewHistory(c.ActionConfig)
 	histClient.Max = 1
 	if _, err := histClient.Run(release); err == driver.ErrReleaseNotFound {
@@ -482,7 +482,7 @@ func (c *Client) chartIsInstalled(release string) (bool, error) {
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client
-func (c *Client) mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
+func mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
 	installOptions.DisableHooks = chartSpec.DisableHooks
 	installOptions.Replace = chartSpec.Replace
 	installOptions.Wait = chartSpec.Wait
@@ -499,7 +499,7 @@ func (c *Client) mergeInstallOptions(chartSpec *ChartSpec, installOptions *actio
 }
 
 // mergeUpgradeOptions merges values of the provided chart to helm upgrade options used by the client
-func (c *Client) mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
+func mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
 	upgradeOptions.Version = chartSpec.Version
 	upgradeOptions.Namespace = chartSpec.Namespace
 	upgradeOptions.Timeout = chartSpec.Timeout
@@ -516,7 +516,7 @@ func (c *Client) mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *actio
 }
 
 // mergeUninstallReleaseOptions merges values of the provided chart to helm uninstall options used by the client
-func (c *Client) mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *action.Uninstall) {
+func mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *action.Uninstall) {
 	uninstallReleaseOptions.DisableHooks = chartSpec.DisableHooks
 	uninstallReleaseOptions.Timeout = chartSpec.Timeout
 }
