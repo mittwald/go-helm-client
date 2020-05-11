@@ -1,4 +1,4 @@
-package helmclient
+package mockhelmclient
 
 import (
 	"testing"
@@ -7,15 +7,16 @@ import (
 )
 
 func TestUpdateChartRepos(t *testing.T) {
-	var e error
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockClient := NewMockClient(ctrl)
 
-	mockClient.EXPECT().
-		UpdateChartRepos().
-		Return(e).
-		Times(1).
-		Do(mockClient.UpdateChartRepos())
+	t.Run("UpdateChartRepos", func(t *testing.T) {
+		mockClient.EXPECT().UpdateChartRepos()
+		err := mockClient.UpdateChartRepos()
+		if err != nil {
+			panic(err)
+		}
+	})
 }
