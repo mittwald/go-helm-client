@@ -31,27 +31,27 @@ const (
 	defaultRepositoryConfigPath = "/tmp/.helmrepo"
 )
 
-// New returns a new Helm client with the provided options
-func (c *HelmClient) New(options *Options) (*HelmClient, error) {
+// NewClient returns a new Helm client with the provided options
+func NewClient(options *Options) (*HelmClient, error) {
 	settings := cli.New()
 
-	err := c.setEnvSettings(options, settings)
+	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.newClient(options, settings.RESTClientGetter(), settings)
+	return newClient(options, settings.RESTClientGetter(), settings)
 }
 
 // NewClientFromKubeConf returns a new Helm client constructed with the provided kubeconfig options
-func (c *HelmClient) NewClientFromKubeConf(options *KubeConfClientOptions) (*HelmClient, error) {
+func NewClientFromKubeConf(options *KubeConfClientOptions) (*HelmClient, error) {
 	settings := cli.New()
 	if options.KubeConfig == nil {
 		return nil, fmt.Errorf("kubeconfig missing")
 	}
 
 	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil)
-	err := c.setEnvSettings(options.Options, settings)
+	err := setEnvSettings(options.Options, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -60,26 +60,26 @@ func (c *HelmClient) NewClientFromKubeConf(options *KubeConfClientOptions) (*Hel
 		settings.KubeContext = options.KubeContext
 	}
 
-	return c.newClient(options.Options, clientGetter, settings)
+	return newClient(options.Options, clientGetter, settings)
 }
 
 // NewClientFromRestConf returns a new Helm client constructed with the provided REST config options
-func (c *HelmClient) NewClientFromRestConf(options *RestConfClientOptions) (*HelmClient, error) {
+func NewClientFromRestConf(options *RestConfClientOptions) (*HelmClient, error) {
 	settings := cli.New()
 
 	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig)
 
-	err := c.setEnvSettings(options.Options, settings)
+	err := setEnvSettings(options.Options, settings)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.newClient(options.Options, clientGetter, settings)
+	return newClient(options.Options, clientGetter, settings)
 }
 
 // newClient returns a new Helm client via the provided options and REST config
-func (c *HelmClient) newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*HelmClient, error) {
-	err := c.setEnvSettings(options, settings)
+func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*HelmClient, error) {
+	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *HelmClient) newClient(options *Options, clientGetter genericclioptions.
 }
 
 // setEnvSettings sets the client's environment settings based on the provided client configuration
-func (c *HelmClient) setEnvSettings(options *Options, settings *cli.EnvSettings) error {
+func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 	if options == nil {
 		options = &Options{
 			RepositoryConfig: defaultRepositoryConfigPath,
@@ -217,7 +217,7 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 // install lints and installs the provided chart
 func (c *HelmClient) install(spec *ChartSpec) error {
 	client := action.NewInstall(c.ActionConfig)
-	c.mergeInstallOptions(spec, client)
+	mergeInstallOptions(spec, client)
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -281,7 +281,7 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 // upgrade upgrades a chart and CRDs
 func (c *HelmClient) upgrade(spec *ChartSpec) error {
 	client := action.NewUpgrade(c.ActionConfig)
-	c.mergeUpgradeOptions(spec, client)
+	mergeUpgradeOptions(spec, client)
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -352,7 +352,7 @@ func (c *HelmClient) deleteChartFromCache(spec *ChartSpec) error {
 func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 	client := action.NewUninstall(c.ActionConfig)
 
-	c.mergeUninstallReleaseOptions(spec, client)
+	mergeUninstallReleaseOptions(spec, client)
 
 	resp, err := client.Run(spec.ReleaseName)
 	if err != nil {
@@ -482,7 +482,7 @@ func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client
-func (c *HelmClient) mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
+func mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
 	installOptions.DisableHooks = chartSpec.DisableHooks
 	installOptions.Replace = chartSpec.Replace
 	installOptions.Wait = chartSpec.Wait
@@ -499,7 +499,7 @@ func (c *HelmClient) mergeInstallOptions(chartSpec *ChartSpec, installOptions *a
 }
 
 // mergeUpgradeOptions merges values of the provided chart to helm upgrade options used by the client
-func (c *HelmClient) mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
+func mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
 	upgradeOptions.Version = chartSpec.Version
 	upgradeOptions.Namespace = chartSpec.Namespace
 	upgradeOptions.Timeout = chartSpec.Timeout
@@ -516,7 +516,7 @@ func (c *HelmClient) mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *a
 }
 
 // mergeUninstallReleaseOptions merges values of the provided chart to helm uninstall options used by the client
-func (c *HelmClient) mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *action.Uninstall) {
+func mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *action.Uninstall) {
 	uninstallReleaseOptions.DisableHooks = chartSpec.DisableHooks
 	uninstallReleaseOptions.Timeout = chartSpec.Timeout
 }

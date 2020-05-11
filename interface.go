@@ -5,9 +5,6 @@ import (
 )
 
 type Client interface {
-	New(options *Options) (*Client, error)
-	NewClientFromKubeConf(options *KubeConfClientOptions) (*Client, error)
-	NewClientFromRestConf(options *RestConfClientOptions) (*Client, error)
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
 	InstallOrUpgradeChart(spec *ChartSpec) error
