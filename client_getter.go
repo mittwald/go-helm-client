@@ -9,7 +9,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-
 // NewRESTClientGetter
 //
 // source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
