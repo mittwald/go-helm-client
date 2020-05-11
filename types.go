@@ -1,8 +1,9 @@
 package helmclient
 
 import (
-	"helm.sh/helm/v3/pkg/getter"
 	"time"
+
+	"helm.sh/helm/v3/pkg/getter"
 
 	"k8s.io/client-go/rest"
 

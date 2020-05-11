@@ -31,8 +31,8 @@ const (
 	defaultRepositoryConfigPath = "/tmp/.helmrepo"
 )
 
-// NewClient returns a new Helm client with the provided options
-func NewClient(options *Options) (*HelmClient, error) {
+// New returns a new Helm client with the provided options
+func New(options *Options) (*HelmClient, error) {
 	settings := cli.New()
 
 	err := setEnvSettings(options, settings)
