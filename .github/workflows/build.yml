@@ -18,6 +18,8 @@ jobs:
           cd /
           go get github.com/golang/mock/mockgen@v1.4.3
           cd -
+        env:
+          GO111MODULE: on
 
       - name: verify codegen
         run: export PATH=/github/home/go/bin/:$PATH && go generate ./... && test $(git status --porcelain | wc -l) -eq 0
