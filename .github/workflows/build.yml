@@ -1,8 +1,24 @@
 name: Compile & Test
 
-on: [push]
-
+on: [push, pull_request]
 jobs:
+  codegen-verify:
+    name: Verify code generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - uses: actions/checkout@v1
+
+      - name: install mockgen
+        run: go get github.com/golang/mock/mockgen@v1.4.3
+
+      - name: verify codegen
+        run: export PATH=/github/home/go/bin/:$PATH && go generate ./... && test $(git status --porcelain | wc -l) -eq 0
+
   build:
     name: Run tests
     runs-on: ubuntu-latest
