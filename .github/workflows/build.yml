@@ -16,9 +16,10 @@ jobs:
 
       - name: Install and run mockgen
         run: |
-          cd /
           set -x
           apt-get -y update && apt-get -y install git
+          cd /
+          export PATH=$PATH:$(go env GOPATH)/bin
           go install github.com/golang/mock/mockgen
           cd -
           go generate ./...
