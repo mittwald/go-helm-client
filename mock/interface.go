@@ -5,10 +5,11 @@
 package mockhelmclient
 
 import (
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
+
+	helmclient "github.com/mittwald/go-helm-client"
 	repo "helm.sh/helm/v3/pkg/repo"
+	reflect "reflect"
 )
 
 // MockClient is a mock of Client interface
@@ -63,7 +64,7 @@ func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 }
 
 // InstallOrUpgradeChart mocks base method
-func (m *MockClient) InstallOrUpgradeChart(spec *ChartSpec) error {
+func (m *MockClient) InstallOrUpgradeChart(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", spec)
 	ret0, _ := ret[0].(error)
@@ -77,7 +78,7 @@ func (mr *MockClientMockRecorder) InstallOrUpgradeChart(spec interface{}) *gomoc
 }
 
 // DeleteChartFromCache mocks base method
-func (m *MockClient) DeleteChartFromCache(spec *ChartSpec) error {
+func (m *MockClient) DeleteChartFromCache(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteChartFromCache", spec)
 	ret0, _ := ret[0].(error)
@@ -91,7 +92,7 @@ func (mr *MockClientMockRecorder) DeleteChartFromCache(spec interface{}) *gomock
 }
 
 // UninstallRelease mocks base method
-func (m *MockClient) UninstallRelease(spec *ChartSpec) error {
+func (m *MockClient) UninstallRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UninstallRelease", spec)
 	ret0, _ := ret[0].(error)
