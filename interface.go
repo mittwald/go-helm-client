@@ -4,7 +4,7 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 )
 
-//go:generate mockgen -source=interface.go -destination=./mock/interface.go -package=mockhelmclient
+//go:generate mockgen -source=interface.go -destination=./mock/interface.go -package=mockhelmclient -self_package=.
 
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
