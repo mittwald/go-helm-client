@@ -22,6 +22,7 @@ jobs:
           go install github.com/golang/mock/mockgen
           cd -
           go generate ./...
+          git status --porcelain=v1
           test $(git status --porcelain=v1 | wc -l) -eq 0
         env:
           GO111MODULE: on
