@@ -16,6 +16,7 @@ jobs:
 
       - name: Install and run mockgen
         run: |
+          set -x
           apt-get -y update && apt-get -y install git
           go get github.com/golang/mock/mockgen@v1.4.3
           go generate ./... && test $(git status --porcelain | wc -l) -eq 0
