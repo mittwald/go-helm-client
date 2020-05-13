@@ -20,9 +20,7 @@ jobs:
           apt-get -y update && apt-get -y install git
           cd /
           go install github.com/golang/mock/mockgen
-          mkdir -p /home/runner/go/src/github.com/mittwald/go-helm-client
-          mv ${GITHUB_WORKSPACE} /home/runner/go/src/github.com/mittwald/go-helm-client
-          cd /home/runner/go/src/github.com/mittwald/go-helm-client
+          cd -
           go env
           go generate ./...
           git diff | cat
