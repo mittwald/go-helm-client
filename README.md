@@ -2,15 +2,20 @@
 
 Go client library for accessing [Helm](https://github.com/helm/helm), enabling the user to programmatically change helm charts and releases.
                                                                                                                          
-This library is build upon `helm/v3.1.2` and available under the MIT License:
+This library is build upon `helm/v3.1.2` and available under the MIT License.
  
+![Compile & Test](https://github.com/mittwald/go-helm-client/workflows/Compile%20&%20Test/badge.svg)
 [![GitHub license](https://img.shields.io/github/license/mittwald/go-helm-client.svg)](https://github.com/mittwald/go-helm-client/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mittwald/go-helm-client)](https://goreportcard.com/report/github.com/mittwald/go-helm-client)
+[![Documentation](https://godoc.org/github.com/mittwald/go-helm-client?status.svg)](https://pkg.go.dev/github.com/mittwald/go-helm-client)
+
+## Installation
+
+Install this library using `go get`:
+
+    $ go get github.com/mittwald/go-helm-client
 
 ## Usage
-
-```go
-import "github.com/mittwald/go-helm-client"
-```
 Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases:
 ```go 
 package main
@@ -88,4 +93,4 @@ err := helmClient.AddOrUpdateChartRepo(repo.Entry{
 ```
 
 ## Documentation
-For more specific documentation, please refer to the [godoc](https://pkg.go.dev/github.com/mittwald/go-helm-client/) of this library
+For more specific documentation, please refer to the [godoc](https://pkg.go.dev/github.com/mittwald/go-helm-client/) of this library.
