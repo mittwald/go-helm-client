@@ -13,8 +13,6 @@ jobs:
           go-version: 1.13
 
       - uses: actions/checkout@v2
-        with:
-          path: '../go/src/github.com/mittwald/'
 
       - name: Install and run mockgen
         run: |
@@ -22,7 +20,8 @@ jobs:
           apt-get -y update && apt-get -y install git
           cd /
           go install github.com/golang/mock/mockgen
-          cd ${GITHUB_WORKSPACE}../go/src/github.com/mittwald/go-helm-client
+          mv ${GITHUB_WORKSPACE}/go-helm-client/go-helm-client ${GITHUB_WORKSPACE}/../go/src/github.com/mittwald/go-helm-client
+          cd ${GITHUB_WORKSPACE}/../go/src/github.com/mittwald/go-helm-client
           go env
           go generate ./...
           git diff | cat
