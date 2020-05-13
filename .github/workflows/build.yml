@@ -19,9 +19,10 @@ jobs:
           set -x
           apt-get -y update && apt-get -y install git
           cd /
-          export PATH=$PATH:$(go env GOPATH)/bin
           go install github.com/golang/mock/mockgen
           cd -
+          go env
+          git diff | cat
           go generate ./...
           git status --porcelain=v1
           test $(git status --porcelain=v1 | wc -l) -eq 0
