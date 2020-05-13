@@ -3,6 +3,7 @@ module github.com/mittwald/go-helm-client
 go 1.13
 
 require (
+	github.com/golang/mock v1.4.3
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
