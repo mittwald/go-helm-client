@@ -16,61 +16,12 @@ Install this library using `go get`:
     $ go get github.com/mittwald/go-helm-client
 
 ## Usage
-Construct a new Helm client, then use the various services on the client to manage helm chart repositories and releases:
-```go 
-package main
+Example usage of the client can be found in the [package examples](https://pkg.go.dev/github.com/mittwald/go-helm-client?tab=doc#pkg-examples).
 
-import (
-	"github.com/mittwald/go-helm-client"
-	"helm.sh/helm/v3/pkg/repo"
-)
+#### Private chart repository
+When working with private repositories, you can utilize the `Username` and `Password` parameters of a chart entry to specify credentials.
 
-func main() {
-	// Create a client
-	helmClient, err := helmclient.New(&helmclient.Options{
-		RepositoryCache:  "/tmp/.helmcache",
-		RepositoryConfig: "/tmp/.helmrepo",
-		Debug:            true,
-		Linting:          true,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// Add needed chart-repos to the client
-	err = helmClient.AddOrUpdateChartRepo(repo.Entry{
-		Name: "stable",
-		URL:  "https://kubernetes-charts.storage.googleapis.com",
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// Define the chart you want to install
-	chartSpec := helmclient.ChartSpec{
-		ReleaseName: "etcd-operator",
-		ChartName:   "stable/etcd-operator",
-		Namespace:   "default",
-		UpgradeCRDs: true,
-		Wait:        true,
-	}
-
-	err = helmClient.InstallOrUpgradeChart(&chartSpec)
-	if err != nil {
-		panic(err)
-	}
-}
-```
-
-Alternatively, you can create a client via REST config: 
-```go
-helmClient, err := helmclient.NewClientFromRestConf(&restClientOpts)
-```
-or via Kubeconfig:
-
-```go
-helmClient, err := helmclient.NewClientFromKubeConf()
-```
+An example of this can be found in the corresponding [example](https://pkg.go.dev/github.com/mittwald/go-helm-client?tab=doc#example_HelmClient_AddOrUpdateChartRepo_private).
 
 ## Mock Client
 
@@ -80,17 +31,6 @@ Example usage of the mocked client can be found in [mock/mock_test.go](mock/mock
 
 If you made changes to [interface.go](./interface.go), you should issue the `go generate ./...` command to trigger code generation. 
 
-#### Private chart repository
-When working with private repositories, you can utilize the `Username` and `Password` parameters of a chart entry to specify credentials, e.g.:
-
-```go
-err := helmClient.AddOrUpdateChartRepo(repo.Entry{
-    Name: "stable",
-    URL:  "https://private-chart.somedomain.com",
-    Username: "foo",
-    Password: "bar",
-})
-```
 
 ## Documentation
 For more specific documentation, please refer to the [godoc](https://pkg.go.dev/github.com/mittwald/go-helm-client/) of this library.

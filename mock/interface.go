@@ -5,10 +5,11 @@
 package mockhelmclient
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	helmclient "github.com/mittwald/go-helm-client"
 	repo "helm.sh/helm/v3/pkg/repo"
-	reflect "reflect"
 )
 
 // MockClient is a mock of Client interface
