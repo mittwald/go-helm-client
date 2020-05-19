@@ -13,8 +13,6 @@ func ExampleNew() {
 		Linting:          true,
 	}
 
-	// Construct a new Helm client, where '_' is the constructed client.
-	// Change this empty assignment to get access to the client's services.
 	helmClient, err := New(opt)
 	if err != nil {
 		panic(err)
@@ -33,12 +31,11 @@ func ExampleNewClientFromRestConf() {
 		RestConfig: &rest.Config{},
 	}
 
-	// Construct a new Helm client via REST configuration, where '_' is the constructed client.
-	// Change this empty assignment to get access to the client's services.
-	_, err := NewClientFromRestConf(opt)
+	helmClient, err := NewClientFromRestConf(opt)
 	if err != nil {
 		panic(err)
 	}
+	_ = helmClient
 }
 
 func ExampleNewClientFromKubeConf() {
@@ -53,12 +50,11 @@ func ExampleNewClientFromKubeConf() {
 		KubeConfig:  []byte{},
 	}
 
-	// Construct a new Helm client via KubeConf, where '_' is the constructed client.
-	// Change this empty assignment to get access to the client's services.
-	_, err := NewClientFromKubeConf(opt)
+	helmClient, err := NewClientFromKubeConf(opt)
 	if err != nil {
 		panic(err)
 	}
+	_ = helmClient
 }
 
 func ExampleHelmClient_AddOrUpdateChartRepo_public() {
