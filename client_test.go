@@ -15,10 +15,11 @@ func ExampleNew() {
 
 	// Construct a new Helm client, where '_' is the constructed client.
 	// Change this empty assignment to get access to the client's services.
-	_, err := New(opt)
+	helmClient, err := New(opt)
 	if err != nil {
 		panic(err)
 	}
+	_ = helmClient
 }
 
 func ExampleNewClientFromRestConf() {
@@ -61,10 +62,6 @@ func ExampleNewClientFromKubeConf() {
 }
 
 func ExampleHelmClient_AddOrUpdateChartRepo_public() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	// Define a public chart repository
 	chartRepo := repo.Entry{
 		Name: "stable",
@@ -78,10 +75,6 @@ func ExampleHelmClient_AddOrUpdateChartRepo_public() {
 }
 
 func ExampleHelmClient_AddOrUpdateChartRepo_private() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	// Define a private chart repository
 	chartRepo := repo.Entry{
 		Name:     "stable",
@@ -97,10 +90,6 @@ func ExampleHelmClient_AddOrUpdateChartRepo_private() {
 }
 
 func ExampleHelmClient_InstallOrUpgradeChart() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	// Define the chart to be installed
 	chartSpec := ChartSpec{
 		ReleaseName: "etcd-operator",
@@ -116,10 +105,6 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 }
 
 func ExampleHelmClient_DeleteChartFromCache() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	// Define the chart to be deleted from the client's cache
 	chartSpec := ChartSpec{
 		ReleaseName: "etcd-operator",
@@ -135,20 +120,12 @@ func ExampleHelmClient_DeleteChartFromCache() {
 
 }
 func ExampleHelmClient_UpdateChartRepos() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	if err := helmClient.UpdateChartRepos(); err != nil {
 		panic(err)
 	}
 }
 
 func ExampleHelmClient_UninstallRelease() {
-	// Dummy assignment
-	// Construct a real Helm client via New(), NewClientFromRestConf(), or NewClientFromKubeConf()
-	helmClient := &HelmClient{}
-
 	// Define the released chart to be installed
 	chartSpec := ChartSpec{
 		ReleaseName: "etcd-operator",
