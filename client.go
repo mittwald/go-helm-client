@@ -32,7 +32,7 @@ const (
 )
 
 // New returns a new Helm client with the provided options
-func New(options *Options) (*HelmClient, error) {
+func New(options *Options) (Client, error) {
 	settings := cli.New()
 
 	err := setEnvSettings(options, settings)
@@ -44,7 +44,7 @@ func New(options *Options) (*HelmClient, error) {
 }
 
 // NewClientFromKubeConf returns a new Helm client constructed with the provided kubeconfig options
-func NewClientFromKubeConf(options *KubeConfClientOptions) (*HelmClient, error) {
+func NewClientFromKubeConf(options *KubeConfClientOptions) (Client, error) {
 	settings := cli.New()
 	if options.KubeConfig == nil {
 		return nil, fmt.Errorf("kubeconfig missing")
@@ -64,7 +64,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions) (*HelmClient, error) 
 }
 
 // NewClientFromRestConf returns a new Helm client constructed with the provided REST config options
-func NewClientFromRestConf(options *RestConfClientOptions) (*HelmClient, error) {
+func NewClientFromRestConf(options *RestConfClientOptions) (Client, error) {
 	settings := cli.New()
 
 	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig)
@@ -78,7 +78,7 @@ func NewClientFromRestConf(options *RestConfClientOptions) (*HelmClient, error) 
 }
 
 // newClient returns a new Helm client via the provided options and REST config
-func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*HelmClient, error) {
+func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (Client, error) {
 	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
