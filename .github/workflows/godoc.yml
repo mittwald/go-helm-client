@@ -1,0 +1,16 @@
+name: GoDoc
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  GOPROXY: https://proxy.golang.org
+
+jobs:
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test successful curl against module mirror
+        run : test $(curl -s -o /dev/null -w "%{http_code}"  ${GOPROXY}/github.com/mittwald/go-helm-client/@v/${GITHUB_REF/refs\/tags\//}.info) -eq 200
