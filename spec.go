@@ -1,7 +1,7 @@
 package helmclient
 
 import (
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 // GetValuesMap returns the mapped out values of a chart
