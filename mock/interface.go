@@ -5,6 +5,7 @@
 package mockhelmclient
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	helmclient "github.com/mittwald/go-helm-client"
 	repo "helm.sh/helm/v3/pkg/repo"
@@ -63,17 +64,17 @@ func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 }
 
 // InstallOrUpgradeChart mocks base method
-func (m *MockClient) InstallOrUpgradeChart(spec *helmclient.ChartSpec) error {
+func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", spec)
+	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InstallOrUpgradeChart indicates an expected call of InstallOrUpgradeChart
-func (mr *MockClientMockRecorder) InstallOrUpgradeChart(spec interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) InstallOrUpgradeChart(ctx, spec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallOrUpgradeChart", reflect.TypeOf((*MockClient)(nil).InstallOrUpgradeChart), spec)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallOrUpgradeChart", reflect.TypeOf((*MockClient)(nil).InstallOrUpgradeChart), ctx, spec)
 }
 
 // DeleteChartFromCache mocks base method

@@ -2,6 +2,7 @@ package helmclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -192,14 +193,14 @@ func (c *HelmClient) UpdateChartRepos() error {
 
 // InstallOrUpgradeChart triggers the installation of the provided chart.
 // If the chart is already installed, trigger an upgrade instead
-func (c *HelmClient) InstallOrUpgradeChart(spec *ChartSpec) error {
+func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error {
 	installed, err := c.chartIsInstalled(spec.ReleaseName)
 	if err != nil {
 		return err
 	}
 
 	if installed {
-		return c.upgrade(spec)
+		return c.upgrade(ctx, spec)
 	}
 	return c.install(spec)
 }
@@ -279,7 +280,7 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 }
 
 // upgrade upgrades a chart and CRDs
-func (c *HelmClient) upgrade(spec *ChartSpec) error {
+func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 	client := action.NewUpgrade(c.ActionConfig)
 	mergeUpgradeOptions(spec, client)
 
@@ -312,7 +313,7 @@ func (c *HelmClient) upgrade(spec *ChartSpec) error {
 
 	if !spec.SkipCRDs && spec.UpgradeCRDs {
 		log.Printf("updating crds")
-		err = c.upgradeCRDs(helmChart)
+		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
 			return err
 		}
@@ -382,7 +383,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 }
 
 // upgradeCRDs upgrades the CRDs of the provided chart
-func (c *HelmClient) upgradeCRDs(chartInstance *chart.Chart) error {
+func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
 	cfg, err := c.Settings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
@@ -415,12 +416,12 @@ func (c *HelmClient) upgradeCRDs(chartInstance *chart.Chart) error {
 			if err != nil {
 				return err
 			}
-			existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(crdObj.Name, metaV1.GetOptions{})
+			existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metaV1.GetOptions{})
 			if err != nil {
 				return err
 			}
 			crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-			_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(&crdObj)
+			_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metaV1.UpdateOptions{})
 			if err != nil {
 				return err
 			}
@@ -431,12 +432,12 @@ func (c *HelmClient) upgradeCRDs(chartInstance *chart.Chart) error {
 			if err != nil {
 				return err
 			}
-			existingCRDObj, err := k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(crdObj.Name, metaV1.GetOptions{})
+			existingCRDObj, err := k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metaV1.GetOptions{})
 			if err != nil {
 				return err
 			}
 			crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-			_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(&crdObj)
+			_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metaV1.UpdateOptions{})
 			if err != nil {
 				return err
 			}

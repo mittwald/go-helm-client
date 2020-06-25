@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"context"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -9,7 +10,7 @@ import (
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
-	InstallOrUpgradeChart(spec *ChartSpec) error
+	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error
 	DeleteChartFromCache(spec *ChartSpec) error
 	UninstallRelease(spec *ChartSpec) error
 }
