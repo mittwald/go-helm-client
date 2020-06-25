@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"context"
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/client-go/rest"
 )
@@ -95,7 +96,7 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 		Wait:        true,
 	}
 
-	if err := helmClient.InstallOrUpgradeChart(&chartSpec); err != nil {
+	if err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
 		panic(err)
 	}
 }
