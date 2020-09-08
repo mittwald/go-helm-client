@@ -104,3 +104,32 @@ func (mr *MockClientMockRecorder) UninstallRelease(spec interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UninstallRelease", reflect.TypeOf((*MockClient)(nil).UninstallRelease), spec)
 }
+
+// TemplateChart mocks base method
+func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TemplateChart", spec)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TemplateChart indicates an expected call of TemplateChart
+func (mr *MockClientMockRecorder) TemplateChart(spec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TemplateChart", reflect.TypeOf((*MockClient)(nil).TemplateChart), spec)
+}
+
+// LintChart mocks base method
+func (m *MockClient) LintChart(spec *helmclient.ChartSpec) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LintChart", spec)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LintChart indicates an expected call of LintChart
+func (mr *MockClientMockRecorder) LintChart(spec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LintChart", reflect.TypeOf((*MockClient)(nil).LintChart), spec)
+}
