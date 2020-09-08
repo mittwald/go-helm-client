@@ -13,4 +13,6 @@ type Client interface {
 	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error
 	DeleteChartFromCache(spec *ChartSpec) error
 	UninstallRelease(spec *ChartSpec) error
+	TemplateChart(spec *ChartSpec) ([]byte, error)
+	LintChart(spec *ChartSpec) error
 }

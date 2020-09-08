@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
@@ -380,6 +381,95 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 	}
 
 	return nil
+}
+
+func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
+	client := action.NewInstall(c.ActionConfig)
+	mergeInstallOptions(spec, client)
+
+	client.DryRun = true
+	client.ReleaseName = "RELEASE-NAME"
+	client.Replace = true // Skip the name check
+	client.ClientOnly = true
+	client.APIVersions = []string{}
+	client.IncludeCRDs = true
+
+	if client.Version == "" {
+		client.Version = ">0.0.0-0"
+	}
+
+	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	if helmChart.Metadata.Type != "" && helmChart.Metadata.Type != "application" {
+		return nil, fmt.Errorf(
+			"chart %q has an unsupported type and is not installable: %q",
+			helmChart.Metadata.Name,
+			helmChart.Metadata.Type,
+		)
+	}
+
+	if req := helmChart.Metadata.Dependencies; req != nil {
+		if err := action.CheckDependencies(helmChart, req); err != nil {
+			if client.DependencyUpdate {
+				man := &downloader.Manager{
+					ChartPath:        chartPath,
+					Keyring:          client.ChartPathOptions.Keyring,
+					SkipUpdate:       false,
+					Getters:          c.Providers,
+					RepositoryConfig: c.Settings.RepositoryConfig,
+					RepositoryCache:  c.Settings.RepositoryCache,
+				}
+				if err := man.Update(); err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, err
+			}
+		}
+	}
+
+	values, err := spec.GetValuesMap()
+	if err != nil {
+		return nil, err
+	}
+
+	out := new(bytes.Buffer)
+	rel, err := client.Run(helmChart, values)
+
+	// We ignore a potential error here because, when the --debug flag was specified,
+	// we always want to print the YAML, even if it is not valid. The error is still returned afterwards.
+	if rel != nil {
+		var manifests bytes.Buffer
+		fmt.Fprintln(&manifests, strings.TrimSpace(rel.Manifest))
+		if !client.DisableHooks {
+			for _, m := range rel.Hooks {
+				fmt.Fprintf(&manifests, "---\n# Source: %s\n%s\n", m.Path, m.Manifest)
+			}
+		}
+
+		// if we have a list of files to render, then check that each of the
+		// provided files exists in the chart.
+		fmt.Fprintf(out, "%s", manifests.String())
+	}
+
+	return out.Bytes(), err
+}
+
+func (c *HelmClient) LintChart(spec *ChartSpec) error {
+	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
+	if err != nil {
+		return err
+	}
+
+	values, err := spec.GetValuesMap()
+	if err != nil {
+		return err
+	}
+
+	return c.lint(chartPath, values)
 }
 
 // upgradeCRDs upgrades the CRDs of the provided chart
