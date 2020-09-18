@@ -2,6 +2,7 @@ package helmclient
 
 import (
 	"context"
+
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/client-go/rest"
 )
@@ -114,8 +115,8 @@ func ExampleHelmClient_DeleteChartFromCache() {
 	if err := helmClient.DeleteChartFromCache(&chartSpec); err != nil {
 		panic(err)
 	}
-
 }
+
 func ExampleHelmClient_UpdateChartRepos() {
 	if err := helmClient.UpdateChartRepos(); err != nil {
 		panic(err)

@@ -164,7 +164,7 @@ func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 	}
 
 	c.storage.Update(&entry)
-	err = c.storage.WriteFile(c.Settings.RepositoryConfig, 0644)
+	err = c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (c *HelmClient) UpdateChartRepos() error {
 		c.storage.Update(entry)
 	}
 
-	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0644)
+	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 }
 
 // InstallOrUpgradeChart triggers the installation of the provided chart.
