@@ -115,4 +115,7 @@ type ChartSpec struct {
 
 	// +optional
 	CleanupOnFail bool `json:"cleanupOnFail,omitempty"`
+
+	// +optional
+	DryRun bool `json:"dryRun,omitempty"`
 }
