@@ -586,6 +586,7 @@ func mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
 	installOptions.NameTemplate = chartSpec.NameTemplate
 	installOptions.Atomic = chartSpec.Atomic
 	installOptions.SkipCRDs = chartSpec.SkipCRDs
+	installOptions.DryRun = chartSpec.DryRun
 	installOptions.SubNotes = chartSpec.SubNotes
 }
 
@@ -603,6 +604,7 @@ func mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
 	upgradeOptions.MaxHistory = chartSpec.MaxHistory
 	upgradeOptions.Atomic = chartSpec.Atomic
 	upgradeOptions.CleanupOnFail = chartSpec.CleanupOnFail
+	upgradeOptions.DryRun = chartSpec.DryRun
 	upgradeOptions.SubNotes = chartSpec.SubNotes
 }
 
