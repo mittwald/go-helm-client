@@ -86,14 +86,19 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		return nil, err
 	}
 
+	debugLog := options.DebugLog
+	if debugLog == nil {
+		debugLog = func(format string, v ...interface{}) {
+			log.Printf(format, v...)
+		}
+	}
+
 	actionConfig := new(action.Configuration)
 	err = actionConfig.Init(
 		clientGetter,
 		settings.Namespace(),
 		os.Getenv("HELM_DRIVER"),
-		func(format string, v ...interface{}) {
-			log.Printf(format, v)
-		},
+		debugLog,
 	)
 	if err != nil {
 		return nil, err
