@@ -49,6 +49,7 @@ type HelmClient struct {
 	storage      *repo.File
 	ActionConfig *action.Configuration
 	linting      bool
+	DebugLog     action.DebugLog
 }
 
 // ChartSpec defines the values of a helm chart

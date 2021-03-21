@@ -3,6 +3,7 @@ package helmclient
 import (
 	"context"
 
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -16,4 +17,5 @@ type Client interface {
 	UninstallRelease(spec *ChartSpec) error
 	TemplateChart(spec *ChartSpec) ([]byte, error)
 	LintChart(spec *ChartSpec) error
+	SetDebugLog(debugLog action.DebugLog)
 }

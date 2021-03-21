@@ -110,6 +110,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		storage:      &storage,
 		ActionConfig: actionConfig,
 		linting:      options.Linting,
+		DebugLog:     debugLog,
 	}, nil
 }
 
@@ -164,7 +165,7 @@ func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 	}
 
 	if c.storage.Has(entry.Name) {
-		log.Printf("WARNING: repository name %q already exists", entry.Name)
+		c.DebugLog("WARNING: repository name %q already exists", entry.Name)
 		return nil
 	}
 
@@ -280,7 +281,7 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return nil
 }
@@ -318,7 +319,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 	}
 
 	if !spec.SkipCRDs && spec.UpgradeCRDs {
-		log.Printf("updating crds")
+		c.DebugLog("updating crds")
 		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
 			return err
@@ -330,7 +331,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return nil
 }
@@ -350,7 +351,7 @@ func (c *HelmClient) deleteChartFromCache(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("chart removed successfully: %s/%s-%s", helmChart.Name(), spec.ReleaseName, helmChart.AppVersion())
+	c.DebugLog("chart removed successfully: %s/%s-%s", helmChart.Name(), spec.ReleaseName, helmChart.AppVersion())
 
 	return nil
 }
@@ -366,7 +367,7 @@ func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("release removed, response: %v", resp)
+	c.DebugLog("release removed, response: %v", resp)
 
 	return nil
 }
@@ -378,7 +379,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 	result := client.Run([]string{chartPath}, values)
 
 	for _, err := range result.Errors {
-		log.Printf("Error %s", err)
+		c.DebugLog("Error %s", err)
 	}
 
 	if len(result.Errors) > 0 {
@@ -477,6 +478,10 @@ func (c *HelmClient) LintChart(spec *ChartSpec) error {
 	return c.lint(chartPath, values)
 }
 
+func (c *HelmClient) SetDebugLog(debugLog action.DebugLog) {
+	c.DebugLog = debugLog
+}
+
 // upgradeCRDs upgrades the CRDs of the provided chart
 func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
 	cfg, err := c.Settings.RESTClientGetter().ToRESTConfig()
@@ -558,7 +563,7 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	}
 
 	if helmChart.Metadata.Deprecated {
-		log.Printf("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
 	}
 
 	return helmChart, chartPath, err

@@ -8,6 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	helmclient "github.com/mittwald/go-helm-client"
+	action "helm.sh/helm/v3/pkg/action"
 	repo "helm.sh/helm/v3/pkg/repo"
 	reflect "reflect"
 )
@@ -132,4 +133,16 @@ func (m *MockClient) LintChart(spec *helmclient.ChartSpec) error {
 func (mr *MockClientMockRecorder) LintChart(spec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LintChart", reflect.TypeOf((*MockClient)(nil).LintChart), spec)
+}
+
+// SetDebugLog mocks base method
+func (m *MockClient) SetDebugLog(debugLog action.DebugLog) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetDebugLog", debugLog)
+}
+
+// SetDebugLog indicates an expected call of SetDebugLog
+func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDebugLog", reflect.TypeOf((*MockClient)(nil).SetDebugLog), debugLog)
 }
