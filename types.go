@@ -32,6 +32,7 @@ type Options struct {
 	RepositoryCache  string
 	Debug            bool
 	Linting          bool
+	DebugLog         action.DebugLog
 }
 
 // RESTClientGetter defines the values of a helm REST client
