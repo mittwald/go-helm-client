@@ -16,6 +16,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	apiextensionsV1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -209,6 +210,22 @@ func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 		return c.upgrade(ctx, spec)
 	}
 	return c.install(spec)
+}
+
+// ListDeployedReleases lists all deployed releases.
+// Namespace and other context is provided via the Options struct when instantiating a client.
+func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
+	return c.listDeployedReleases()
+}
+
+// GetReleaseValues returns the (optionally, all computed) values for the specified release.
+func (c *HelmClient) GetReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
+	return c.getReleaseValues(name, allValues)
+}
+
+// GetRelease returns a release specified by name.
+func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
+	return c.getRelease(name)
 }
 
 // DeleteChartFromCache deletes the provided chart from the client's cache
@@ -575,6 +592,28 @@ func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
+	listClient := action.NewList(c.ActionConfig)
+
+	listClient.StateMask = action.ListDeployed
+
+	return listClient.Run()
+}
+
+func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
+	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
+
+	getReleaseValuesClient.AllValues = allValues
+
+	return getReleaseValuesClient.Run(name)
+}
+
+func (c *HelmClient) getRelease(name string) (*release.Release, error) {
+	getReleaseClient := action.NewGet(c.ActionConfig)
+
+	return getReleaseClient.Run(name)
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client

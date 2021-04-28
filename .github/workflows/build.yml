@@ -19,7 +19,7 @@ jobs:
           set -x
           apt-get -y update && apt-get -y install git
           cd /
-          go get -u github.com/golang/mock/mockgen@v1.4.4
+          go get -u github.com/golang/mock/mockgen@v1.5.0
           cd -
           go env
           go generate ./...

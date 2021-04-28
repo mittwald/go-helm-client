@@ -137,3 +137,21 @@ func ExampleHelmClient_UninstallRelease() {
 		panic(err)
 	}
 }
+
+func ExampleHelmClient_ListDeployedReleases() {
+	if _, err := helmClient.ListDeployedReleases(); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_GetReleaseValues() {
+	if _, err := helmClient.GetReleaseValues("etcd-operator", true); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_GetRelease() {
+	if _, err := helmClient.GetRelease("etcd-operator"); err != nil {
+		panic(err)
+	}
+}
