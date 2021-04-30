@@ -139,6 +139,18 @@ func (mr *MockClientMockRecorder) ListDeployedReleases() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDeployedReleases", reflect.TypeOf((*MockClient)(nil).ListDeployedReleases))
 }
 
+// SetDebugLog mocks base method.
+func (m *MockClient) SetDebugLog(debugLog action.DebugLog) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetDebugLog", debugLog)
+}
+
+// SetDebugLog indicates an expected call of SetDebugLog.
+func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDebugLog", reflect.TypeOf((*MockClient)(nil).SetDebugLog), debugLog)
+}
+
 // TemplateChart mocks base method.
 func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -180,16 +192,4 @@ func (m *MockClient) UpdateChartRepos() error {
 func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChartRepos", reflect.TypeOf((*MockClient)(nil).UpdateChartRepos))
-}
-
-// SetDebugLog mocks base method
-func (m *MockClient) SetDebugLog(debugLog action.DebugLog) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetDebugLog", debugLog)
-}
-
-// SetDebugLog indicates an expected call of SetDebugLog
-func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDebugLog", reflect.TypeOf((*MockClient)(nil).SetDebugLog), debugLog)
 }
