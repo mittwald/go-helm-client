@@ -632,7 +632,7 @@ func (c *HelmClient) rollbackRelease(spec *ChartSpec, version int) error {
 	return client.Run(spec.ReleaseName)
 }
 
-// mergeInstallOptions merges values of the provided chart to helm rollback options used by the client
+// mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client
 func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback) {
 	rollbackOptions.DisableHooks = chartSpec.DisableHooks
 	rollbackOptions.DryRun = chartSpec.DryRun
