@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Set up Go 1.15
+      - name: Set up Go 1.16
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
+          go-version: 1.16
 
       - uses: actions/checkout@v2
 
@@ -19,7 +19,7 @@ jobs:
           set -x
           apt-get -y update && apt-get -y install git
           cd /
-          go get -u github.com/golang/mock/mockgen@v1.5.0
+          go get -u github.com/golang/mock/mockgen@v1.6.0
           cd -
           go env
           go generate ./...
@@ -34,13 +34,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.15', '1.14' ]
+        go: [ '1.16', '1.15' ]
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Set up Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
 

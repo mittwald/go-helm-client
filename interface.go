@@ -15,6 +15,7 @@ type Client interface {
 	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error
 	ListDeployedReleases() ([]*release.Release, error)
 	GetRelease(name string) (*release.Release, error)
+	RollbackRelease(spec *ChartSpec, version int) error
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
 	DeleteChartFromCache(spec *ChartSpec) error
 	UninstallRelease(spec *ChartSpec) error

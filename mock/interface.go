@@ -138,6 +138,20 @@ func (mr *MockClientMockRecorder) ListDeployedReleases() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDeployedReleases", reflect.TypeOf((*MockClient)(nil).ListDeployedReleases))
 }
 
+// RollbackRelease mocks base method.
+func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec, version int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RollbackRelease", spec, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RollbackRelease indicates an expected call of RollbackRelease.
+func (mr *MockClientMockRecorder) RollbackRelease(spec, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockClient)(nil).RollbackRelease), spec, version)
+}
+
 // TemplateChart mocks base method.
 func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
 	m.ctrl.T.Helper()
