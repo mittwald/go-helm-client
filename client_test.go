@@ -155,3 +155,19 @@ func ExampleHelmClient_GetRelease() {
 		panic(err)
 	}
 }
+
+func ExampleHelmClient_RollbackRelease() {
+	// Define the released chart to be installed
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	// Rollback to the previous version of the release by setting the release version to '0'.
+	if err := helmClient.RollbackRelease(&chartSpec, 0); err != nil {
+		return
+	}
+}
