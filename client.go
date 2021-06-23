@@ -302,7 +302,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 
 	rel, err := client.Run(helmChart, values)
 	if err != nil {
-		return nil, err
+		return rel, err
 	}
 
 	log.Printf("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
@@ -352,7 +352,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 
 	rel, err := client.Run(spec.ReleaseName, helmChart, values)
 	if err != nil {
-		return nil, err
+		return rel, err
 	}
 
 	log.Printf("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
