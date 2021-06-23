@@ -97,7 +97,7 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 		Wait:        true,
 	}
 
-	if err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
 		panic(err)
 	}
 }

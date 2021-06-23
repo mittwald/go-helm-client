@@ -96,11 +96,12 @@ func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues interface{}) 
 }
 
 // InstallOrUpgradeChart mocks base method.
-func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) error {
+func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // InstallOrUpgradeChart indicates an expected call of InstallOrUpgradeChart.

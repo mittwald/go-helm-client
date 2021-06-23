@@ -198,17 +198,19 @@ func (c *HelmClient) UpdateChartRepos() error {
 	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 }
 
-// InstallOrUpgradeChart triggers the installation of the provided chart.
-// If the chart is already installed, trigger an upgrade instead
-func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error {
+// InstallOrUpgradeChart triggers the installation of the provided
+// chart and returns the installed / upgraded release.
+// If the chart is already installed, trigger an upgrade instead.
+func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	installed, err := c.chartIsInstalled(spec.ReleaseName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if installed {
 		return c.upgrade(ctx, spec)
 	}
+
 	return c.install(spec)
 }
 
@@ -245,7 +247,7 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 }
 
 // install lints and installs the provided chart
-func (c *HelmClient) install(spec *ChartSpec) error {
+func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
 
@@ -255,11 +257,11 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
-		return err
+		return nil, nil
 	}
 
 	if helmChart.Metadata.Type != "" && helmChart.Metadata.Type != "application" {
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"chart %q has an unsupported type and is not installable: %q",
 			helmChart.Metadata.Name,
 			helmChart.Metadata.Type,
@@ -278,38 +280,38 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 					RepositoryCache:  c.Settings.RepositoryCache,
 				}
 				if err := man.Update(); err != nil {
-					return err
+					return nil, err
 				}
 			} else {
-				return err
+				return nil, err
 			}
 		}
 	}
 
 	values, err := spec.GetValuesMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if c.linting {
 		err = c.lint(chartPath, values)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	rel, err := client.Run(helmChart, values)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	log.Printf("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
-	return nil
+	return rel, nil
 }
 
 // upgrade upgrades a chart and CRDs
-func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
+func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	client := action.NewUpgrade(c.ActionConfig)
 	mergeUpgradeOptions(spec, client)
 
@@ -319,24 +321,24 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if req := helmChart.Metadata.Dependencies; req != nil {
 		if err := action.CheckDependencies(helmChart, req); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	values, err := spec.GetValuesMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if c.linting {
 		err = c.lint(chartPath, values)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -344,18 +346,18 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 		log.Printf("updating crds")
 		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	rel, err := client.Run(spec.ReleaseName, helmChart, values)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	log.Printf("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
-	return nil
+	return rel, nil
 }
 
 // deleteChartFromCache deletes the provided chart from the client's cache
