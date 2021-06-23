@@ -257,7 +257,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	if helmChart.Metadata.Type != "" && helmChart.Metadata.Type != "application" {
