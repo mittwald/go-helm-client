@@ -413,6 +413,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 	return nil
 }
 
+// TemplateChart returns a rendered version of the provided ChartSpec 'spec' by performing a "dry-run" install
 func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
@@ -488,6 +489,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	return out.Bytes(), err
 }
 
+// LintChart fetches a chart using the provided ChartSpec 'spec' and lints it's values.
 func (c *HelmClient) LintChart(spec *ChartSpec) error {
 	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
 	if err != nil {
@@ -602,6 +604,7 @@ func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	return true, nil
 }
 
+// listDeployedReleases lists all deployed helm releases
 func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
 
@@ -610,6 +613,8 @@ func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	return listClient.Run()
 }
 
+// getReleaseValues returns the values for the provided release 'name'.
+// If allValues = true is specified, all computed values are returned.
 func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
 	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
 
@@ -618,12 +623,15 @@ func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]i
 	return getReleaseValuesClient.Run(name)
 }
 
+// getRelease returns a release matching the provided 'name'.
 func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 	getReleaseClient := action.NewGet(c.ActionConfig)
 
 	return getReleaseClient.Run(name)
 }
 
+// rollbackRelease rolls back a release matching the ChartSpec 'spec' to a specific version.
+// Specifying version = 0 will roll back a release to the latest revision.
 func (c *HelmClient) rollbackRelease(spec *ChartSpec, version int) error {
 	client := action.NewRollback(c.ActionConfig)
 

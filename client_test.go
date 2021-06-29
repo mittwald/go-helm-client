@@ -79,6 +79,8 @@ func ExampleHelmClient_AddOrUpdateChartRepo_private() {
 		URL:      "https://private-chartrepo.somedomain.com",
 		Username: "foo",
 		Password: "bar",
+		// Since helm 3.6.1 it is necessary to pass PassCredentialsAll = true
+		PassCredentialsAll: true,
 	}
 
 	// Add a chart-repository to the client
@@ -98,6 +100,42 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 	}
 
 	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_LintChart() {
+	// Define a chart with custom values to be tested
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+		ValuesYaml: `deployments:
+  etcdOperator: true
+  backupOperator: false`,
+	}
+
+	if err := helmClient.LintChart(&chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_TemplateChart() {
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+		ValuesYaml: `deployments:
+  etcdOperator: true
+  backupOperator: false`,
+	}
+
+	_, err := helmClient.TemplateChart(&chartSpec)
+	if err != nil {
 		panic(err)
 	}
 }

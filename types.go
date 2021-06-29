@@ -41,7 +41,7 @@ type RESTClientGetter struct {
 	restConfig *rest.Config
 }
 
-// Client defines the values of a helm client
+// HelmClient Client defines the values of a helm client
 type HelmClient struct {
 	Settings     *cli.EnvSettings
 	Providers    getter.Providers

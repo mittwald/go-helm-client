@@ -30,7 +30,7 @@ func TestHelmClientInterfaces(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		if r == nil || len(r) == 0 {
+		if len(r) == 0 {
 			panic(err)
 		}
 	})
