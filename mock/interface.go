@@ -182,6 +182,20 @@ func (mr *MockClientMockRecorder) UninstallRelease(spec interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UninstallRelease", reflect.TypeOf((*MockClient)(nil).UninstallRelease), spec)
 }
 
+// UninstallReleaseByName mocks base method.
+func (m *MockClient) UninstallReleaseByName(name string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UninstallReleaseByName", name)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UninstallReleaseByName indicates an expected call of UninstallReleaseByName.
+func (mr *MockClientMockRecorder) UninstallReleaseByName(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UninstallReleaseByName", reflect.TypeOf((*MockClient)(nil).UninstallReleaseByName), name)
+}
+
 // UpdateChartRepos mocks base method.
 func (m *MockClient) UpdateChartRepos() error {
 	m.ctrl.T.Helper()
