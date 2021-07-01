@@ -19,6 +19,7 @@ type Client interface {
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
 	DeleteChartFromCache(spec *ChartSpec) error
 	UninstallRelease(spec *ChartSpec) error
+	UninstallReleaseByName(name string) error
 	TemplateChart(spec *ChartSpec) ([]byte, error)
 	LintChart(spec *ChartSpec) error
 }

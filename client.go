@@ -246,6 +246,11 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 	return c.uninstallRelease(spec)
 }
 
+// UninstallReleaseByName uninstalls a release identified by the provided 'name'.
+func (c *HelmClient) UninstallReleaseByName(name string) error {
+	return c.uninstallReleaseByName(name)
+}
+
 // install lints and installs the provided chart
 func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
@@ -391,7 +396,21 @@ func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("release removed, response: %v", resp)
+	log.Printf("release uninstalled, response: %v", resp)
+
+	return nil
+}
+
+// uninstallReleaseByName uninstalls a release identified by the provided 'name'.
+func (c *HelmClient) uninstallReleaseByName(name string) error {
+	client := action.NewUninstall(c.ActionConfig)
+
+	resp, err := client.Run(name)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("release uninstalled, response: %v", resp)
 
 	return nil
 }
