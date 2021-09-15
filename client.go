@@ -19,10 +19,10 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
-	apiextensionsV1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
@@ -348,11 +348,12 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 	}
 
 	if !spec.SkipCRDs && spec.UpgradeCRDs {
-		log.Printf("updating crds")
+		log.Printf("upgrading crds")
 		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
 			return nil, err
 		}
+		log.Printf("CRDs upgraded successfully for chart: %s", helmChart.Metadata.Name)
 	}
 
 	rel, err := client.Run(spec.ReleaseName, helmChart, values)
@@ -360,7 +361,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return rel, err
 	}
 
-	log.Printf("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	log.Printf("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
@@ -536,56 +537,133 @@ func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart
 	}
 
 	for _, crd := range chartInstance.CRDObjects() {
-		// use this ugly detour to parse the crdYaml to a CustomResourceDefinitions-Object because direct
-		// yaml-unmarshalling does not find the correct keys
-		jsonCRD, err := yaml.ToJSON(crd.File.Data)
+		if err := c.upgradeCRD(ctx, k8sClient, crd); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Clientset, crd chart.CRD) error {
+	// use this ugly detour to parse the crdYaml to a CustomResourceDefinitions-Object because direct
+	// yaml-unmarshalling does not find the correct keys
+	jsonCRD, err := yaml.ToJSON(crd.File.Data)
+	if err != nil {
+		return err
+	}
+
+	var typeMeta metav1.TypeMeta
+	err = json.Unmarshal(jsonCRD, &typeMeta)
+	if err != nil {
+		return err
+	}
+
+	switch typeMeta.APIVersion {
+	default:
+		return fmt.Errorf("WARNING: failed to upgrade crd %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
+
+	case "apiextensions.k8s.io/v1beta1":
+		var crdObj v1beta1.CustomResourceDefinition
+		err = json.Unmarshal(jsonCRD, &crdObj)
+		if err != nil {
+			return err
+		}
+		existingCRDObj, err := k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
 
-		var meta metaV1.TypeMeta
-		err = json.Unmarshal(jsonCRD, &meta)
+		// Check to ensure that no previously existing API version is deleted through the upgrade.
+		if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
+			log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
+			break
+		}
+
+		// Check that the storage version does not change through the update.
+		var oldStorageVersion v1beta1.CustomResourceDefinitionVersion
+		var newStorageVersion v1beta1.CustomResourceDefinitionVersion
+
+		for _, oldVersion := range existingCRDObj.Spec.Versions {
+			if oldVersion.Storage {
+				oldStorageVersion = oldVersion
+			}
+		}
+
+		for _, newVersion := range crdObj.Spec.Versions {
+			if newVersion.Storage {
+				newStorageVersion = newVersion
+			}
+		}
+
+		if oldStorageVersion.Name != newStorageVersion.Name {
+			log.Printf("WARNING: storage version of CRD %q changed, skipping upgrade", crdObj.Name)
+			break
+		}
+
+		crdObj.ResourceVersion = existingCRDObj.ResourceVersion
+		_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}})
+		if err != nil {
+			return err
+		}
+		log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+
+		_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+		log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
+
+	case "apiextensions.k8s.io/v1":
+		var crdObj v1.CustomResourceDefinition
+		err = json.Unmarshal(jsonCRD, &crdObj)
+		if err != nil {
+			return err
+		}
+		existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
 
-		switch meta.APIVersion {
-
-		case "apiextensions.k8s.io/apiextensionsV1":
-			var crdObj apiextensionsV1.CustomResourceDefinition
-			err = json.Unmarshal(jsonCRD, &crdObj)
-			if err != nil {
-				return err
-			}
-			existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metaV1.GetOptions{})
-			if err != nil {
-				return err
-			}
-			crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-			_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metaV1.UpdateOptions{})
-			if err != nil {
-				return err
-			}
-
-		case "apiextensions.k8s.io/v1beta1":
-			var crdObj v1beta1.CustomResourceDefinition
-			err = json.Unmarshal(jsonCRD, &crdObj)
-			if err != nil {
-				return err
-			}
-			existingCRDObj, err := k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metaV1.GetOptions{})
-			if err != nil {
-				return err
-			}
-			crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-			_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metaV1.UpdateOptions{})
-			if err != nil {
-				return err
-			}
-
-		default:
-			return fmt.Errorf("failed to update crd %q: unsupported api-version %q", crd.Name, meta.APIVersion)
+		// Check to ensure that no previously existing API version is deleted through the upgrade.
+		if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
+			log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
+			break
 		}
+
+		// Check that the storage version does not change through the update.
+		var oldStorageVersion v1.CustomResourceDefinitionVersion
+		var newStorageVersion v1.CustomResourceDefinitionVersion
+
+		for _, oldVersion := range existingCRDObj.Spec.Versions {
+			if oldVersion.Storage {
+				oldStorageVersion = oldVersion
+			}
+		}
+
+		for _, newVersion := range crdObj.Spec.Versions {
+			if newVersion.Storage {
+				newStorageVersion = newVersion
+			}
+		}
+
+		if oldStorageVersion.Name != newStorageVersion.Name {
+			log.Printf("WARNING: storage version of CRD %q changed, skipping upgrade", crdObj.Name)
+			break
+		}
+
+		crdObj.ResourceVersion = existingCRDObj.ResourceVersion
+		_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}})
+		if err != nil {
+			return err
+		}
+		log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+
+		_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+		log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
 	}
 
 	return nil
