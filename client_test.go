@@ -104,6 +104,51 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 	}
 }
 
+func ExampleHelmClient_InstallOrUpgradeChart_useChartDirectory() {
+	// Use an unpacked chart directory
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "/path/to/stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useLocalChartArchive() {
+	// Use an archived chart directory
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "/path/to/stable/etcd-operator.tar.gz",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useURL() {
+	// Use an archived chart directory via URL
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "http://helm.whatever.com/repo/etcd-operator.tar.gz",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
 func ExampleHelmClient_LintChart() {
 	// Define a chart with custom values to be tested
 	chartSpec := ChartSpec{
