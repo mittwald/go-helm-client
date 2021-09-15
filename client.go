@@ -561,7 +561,7 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 
 	switch typeMeta.APIVersion {
 	default:
-		return fmt.Errorf("WARNING: failed to upgrade crd %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
+		return fmt.Errorf("WARNING: failed to upgrade CRD %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
 
 	case "apiextensions.k8s.io/v1beta1":
 		var crdObj v1beta1.CustomResourceDefinition
