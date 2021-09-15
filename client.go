@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -574,15 +575,8 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 			return err
 		}
 
-		// Check to ensure that no previously existing API version is deleted through the upgrade.
-		if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
-			log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
-			break
-		}
-
 		// Check that the storage version does not change through the update.
-		var oldStorageVersion v1beta1.CustomResourceDefinitionVersion
-		var newStorageVersion v1beta1.CustomResourceDefinitionVersion
+		oldStorageVersion := v1beta1.CustomResourceDefinitionVersion{}
 
 		for _, oldVersion := range existingCRDObj.Spec.Versions {
 			if oldVersion.Storage {
@@ -590,14 +584,22 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 			}
 		}
 
+		i := 0
+
 		for _, newVersion := range crdObj.Spec.Versions {
 			if newVersion.Storage {
-				newStorageVersion = newVersion
+				i++
+				if newVersion.Name != oldStorageVersion.Name {
+					return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
+				}
+			}
+			if i > 1 {
+				return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
 			}
 		}
 
-		if oldStorageVersion.Name != newStorageVersion.Name {
-			log.Printf("WARNING: storage version of CRD %q changed, skipping upgrade", crdObj.Name)
+		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
+			log.Printf("WARNING: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 			break
 		}
 
@@ -632,8 +634,7 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 		}
 
 		// Check that the storage version does not change through the update.
-		var oldStorageVersion v1.CustomResourceDefinitionVersion
-		var newStorageVersion v1.CustomResourceDefinitionVersion
+		oldStorageVersion := v1.CustomResourceDefinitionVersion{}
 
 		for _, oldVersion := range existingCRDObj.Spec.Versions {
 			if oldVersion.Storage {
@@ -641,14 +642,22 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 			}
 		}
 
+		i := 0
+
 		for _, newVersion := range crdObj.Spec.Versions {
 			if newVersion.Storage {
-				newStorageVersion = newVersion
+				i++
+				if newVersion.Name != oldStorageVersion.Name {
+					return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
+				}
+			}
+			if i > 1 {
+				return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
 			}
 		}
 
-		if oldStorageVersion.Name != newStorageVersion.Name {
-			log.Printf("WARNING: storage version of CRD %q changed, skipping upgrade", crdObj.Name)
+		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
+			log.Printf("WARNING: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 			break
 		}
 
