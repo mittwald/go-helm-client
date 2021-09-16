@@ -527,7 +527,7 @@ func (c *HelmClient) LintChart(spec *ChartSpec) error {
 
 // upgradeCRDs upgrades the CRDs of the provided chart
 func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
-	cfg, err := c.Settings.RESTClientGetter().ToRESTConfig()
+	cfg, err := c.ActionConfig.RESTClientGetter.ToRESTConfig()
 	if err != nil {
 		return err
 	}
@@ -599,7 +599,7 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 		}
 
 		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-			log.Printf("WARNING: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+			log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 			break
 		}
 
@@ -657,7 +657,7 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 		}
 
 		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-			log.Printf("WARNING: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+			log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 			break
 		}
 
