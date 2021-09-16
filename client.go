@@ -354,7 +354,6 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("CRDs upgraded successfully for chart: %s", helmChart.Metadata.Name)
 	}
 
 	rel, err := client.Run(spec.ReleaseName, helmChart, values)
@@ -541,6 +540,7 @@ func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart
 		if err := c.upgradeCRD(ctx, k8sClient, crd); err != nil {
 			return err
 		}
+		log.Printf("CRD %s upgraded successfully for chart: %s", crd.Name, chartInstance.Metadata.Name)
 	}
 
 	return nil
