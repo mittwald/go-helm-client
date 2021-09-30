@@ -199,17 +199,19 @@ func (c *HelmClient) UpdateChartRepos() error {
 	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 }
 
-// InstallOrUpgradeChart triggers the installation of the provided chart.
-// If the chart is already installed, trigger an upgrade instead
-func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) error {
+// InstallOrUpgradeChart triggers the installation of the provided
+// chart and returns the installed / upgraded release.
+// If the chart is already installed, trigger an upgrade instead.
+func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	installed, err := c.chartIsInstalled(spec.ReleaseName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if installed {
 		return c.upgrade(ctx, spec)
 	}
+
 	return c.install(spec)
 }
 
@@ -229,6 +231,12 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
+// RollbackRelease rollbacks a release to a specific version.
+// Specifying '0' as the value for 'version' will result in a rollback to the previous release version.
+func (c *HelmClient) RollbackRelease(spec *ChartSpec, version int) error {
+	return c.rollbackRelease(spec, version)
+}
+
 // DeleteChartFromCache deletes the provided chart from the client's cache
 func (c *HelmClient) DeleteChartFromCache(spec *ChartSpec) error {
 	return c.deleteChartFromCache(spec)
@@ -239,8 +247,13 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 	return c.uninstallRelease(spec)
 }
 
+// UninstallReleaseByName uninstalls a release identified by the provided 'name'.
+func (c *HelmClient) UninstallReleaseByName(name string) error {
+	return c.uninstallReleaseByName(name)
+}
+
 // install lints and installs the provided chart
-func (c *HelmClient) install(spec *ChartSpec) error {
+func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
 
@@ -250,11 +263,11 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if helmChart.Metadata.Type != "" && helmChart.Metadata.Type != "application" {
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"chart %q has an unsupported type and is not installable: %q",
 			helmChart.Metadata.Name,
 			helmChart.Metadata.Type,
@@ -273,38 +286,38 @@ func (c *HelmClient) install(spec *ChartSpec) error {
 					RepositoryCache:  c.Settings.RepositoryCache,
 				}
 				if err := man.Update(); err != nil {
-					return err
+					return nil, err
 				}
 			} else {
-				return err
+				return nil, err
 			}
 		}
 	}
 
 	values, err := spec.GetValuesMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if c.linting {
 		err = c.lint(chartPath, values)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	rel, err := client.Run(helmChart, values)
 	if err != nil {
-		return err
+		return rel, err
 	}
 
 	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
-	return nil
+	return rel, nil
 }
 
 // upgrade upgrades a chart and CRDs
-func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
+func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	client := action.NewUpgrade(c.ActionConfig)
 	mergeUpgradeOptions(spec, client)
 
@@ -314,24 +327,24 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if req := helmChart.Metadata.Dependencies; req != nil {
 		if err := action.CheckDependencies(helmChart, req); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	values, err := spec.GetValuesMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if c.linting {
 		err = c.lint(chartPath, values)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -339,18 +352,18 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 		c.DebugLog("updating crds")
 		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	rel, err := client.Run(spec.ReleaseName, helmChart, values)
 	if err != nil {
-		return err
+		return rel, err
 	}
 
 	c.DebugLog("release upgrade successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
-	return nil
+	return rel, nil
 }
 
 // deleteChartFromCache deletes the provided chart from the client's cache
@@ -384,7 +397,21 @@ func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 		return err
 	}
 
-	c.DebugLog("release removed, response: %v", resp)
+	c.DebugLog("release uninstalled, response: %v", resp)
+
+	return nil
+}
+
+// uninstallReleaseByName uninstalls a release identified by the provided 'name'.
+func (c *HelmClient) uninstallReleaseByName(name string) error {
+	client := action.NewUninstall(c.ActionConfig)
+
+	resp, err := client.Run(name)
+	if err != nil {
+		return err
+	}
+
+	c.DebugLog("release uninstalled, response: %v", resp)
 
 	return nil
 }
@@ -406,6 +433,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 	return nil
 }
 
+// TemplateChart returns a rendered version of the provided ChartSpec 'spec' by performing a "dry-run" install
 func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
@@ -481,6 +509,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	return out.Bytes(), err
 }
 
+// LintChart fetches a chart using the provided ChartSpec 'spec' and lints it's values.
 func (c *HelmClient) LintChart(spec *ChartSpec) error {
 	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
 	if err != nil {
@@ -599,6 +628,7 @@ func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	return true, nil
 }
 
+// listDeployedReleases lists all deployed helm releases
 func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
 
@@ -607,6 +637,8 @@ func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	return listClient.Run()
 }
 
+// getReleaseValues returns the values for the provided release 'name'.
+// If allValues = true is specified, all computed values are returned.
 func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
 	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
 
@@ -615,10 +647,35 @@ func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]i
 	return getReleaseValuesClient.Run(name)
 }
 
+// getRelease returns a release matching the provided 'name'.
 func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 	getReleaseClient := action.NewGet(c.ActionConfig)
 
 	return getReleaseClient.Run(name)
+}
+
+// rollbackRelease rolls back a release matching the ChartSpec 'spec' to a specific version.
+// Specifying version = 0 will roll back a release to the latest revision.
+func (c *HelmClient) rollbackRelease(spec *ChartSpec, version int) error {
+	client := action.NewRollback(c.ActionConfig)
+
+	mergeRollbackOptions(spec, client)
+
+	client.Version = version
+
+	return client.Run(spec.ReleaseName)
+}
+
+// mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client
+func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback) {
+	rollbackOptions.DisableHooks = chartSpec.DisableHooks
+	rollbackOptions.DryRun = chartSpec.DryRun
+	rollbackOptions.Timeout = chartSpec.Timeout
+	rollbackOptions.CleanupOnFail = chartSpec.CleanupOnFail
+	rollbackOptions.Force = chartSpec.Force
+	rollbackOptions.MaxHistory = chartSpec.MaxHistory
+	rollbackOptions.Recreate = chartSpec.Recreate
+	rollbackOptions.Wait = chartSpec.Wait
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client

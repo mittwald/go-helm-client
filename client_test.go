@@ -79,6 +79,8 @@ func ExampleHelmClient_AddOrUpdateChartRepo_private() {
 		URL:      "https://private-chartrepo.somedomain.com",
 		Username: "foo",
 		Password: "bar",
+		// Since helm 3.6.1 it is necessary to pass PassCredentialsAll = true
+		PassCredentialsAll: true,
 	}
 
 	// Add a chart-repository to the client
@@ -97,7 +99,88 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 		Wait:        true,
 	}
 
-	if err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useChartDirectory() {
+	// Use an unpacked chart directory
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "/path/to/stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useLocalChartArchive() {
+	// Use an archived chart directory
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "/path/to/stable/etcd-operator.tar.gz",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useURL() {
+	// Use an archived chart directory via URL
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "http://helm.whatever.com/repo/etcd-operator.tar.gz",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	if err, _ := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_LintChart() {
+	// Define a chart with custom values to be tested
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+		ValuesYaml: `deployments:
+  etcdOperator: true
+  backupOperator: false`,
+	}
+
+	if err := helmClient.LintChart(&chartSpec); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_TemplateChart() {
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+		ValuesYaml: `deployments:
+  etcdOperator: true
+  backupOperator: false`,
+	}
+
+	_, err := helmClient.TemplateChart(&chartSpec)
+	if err != nil {
 		panic(err)
 	}
 }
@@ -138,6 +221,12 @@ func ExampleHelmClient_UninstallRelease() {
 	}
 }
 
+func ExampleHelmClient_UninstallReleaseByName() {
+	if err := helmClient.UninstallReleaseByName("etcd-operator"); err != nil {
+		panic(err)
+	}
+}
+
 func ExampleHelmClient_ListDeployedReleases() {
 	if _, err := helmClient.ListDeployedReleases(); err != nil {
 		panic(err)
@@ -153,5 +242,21 @@ func ExampleHelmClient_GetReleaseValues() {
 func ExampleHelmClient_GetRelease() {
 	if _, err := helmClient.GetRelease("etcd-operator"); err != nil {
 		panic(err)
+	}
+}
+
+func ExampleHelmClient_RollbackRelease() {
+	// Define the released chart to be installed
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	// Rollback to the previous version of the release by setting the release version to '0'.
+	if err := helmClient.RollbackRelease(&chartSpec, 0); err != nil {
+		return
 	}
 }

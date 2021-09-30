@@ -97,11 +97,12 @@ func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues interface{}) 
 }
 
 // InstallOrUpgradeChart mocks base method.
-func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) error {
+func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // InstallOrUpgradeChart indicates an expected call of InstallOrUpgradeChart.
@@ -151,6 +152,20 @@ func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDebugLog", reflect.TypeOf((*MockClient)(nil).SetDebugLog), debugLog)
 }
 
+// RollbackRelease mocks base method.
+func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec, version int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RollbackRelease", spec, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RollbackRelease indicates an expected call of RollbackRelease.
+func (mr *MockClientMockRecorder) RollbackRelease(spec, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockClient)(nil).RollbackRelease), spec, version)
+}
+
 // TemplateChart mocks base method.
 func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -178,6 +193,20 @@ func (m *MockClient) UninstallRelease(spec *helmclient.ChartSpec) error {
 func (mr *MockClientMockRecorder) UninstallRelease(spec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UninstallRelease", reflect.TypeOf((*MockClient)(nil).UninstallRelease), spec)
+}
+
+// UninstallReleaseByName mocks base method.
+func (m *MockClient) UninstallReleaseByName(name string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UninstallReleaseByName", name)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UninstallReleaseByName indicates an expected call of UninstallReleaseByName.
+func (mr *MockClientMockRecorder) UninstallReleaseByName(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UninstallReleaseByName", reflect.TypeOf((*MockClient)(nil).UninstallReleaseByName), name)
 }
 
 // UpdateChartRepos mocks base method.
