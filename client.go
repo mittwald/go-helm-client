@@ -569,13 +569,13 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 	default:
 		return fmt.Errorf("WARNING: failed to upgrade CRD %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
 	case "apiextensions.k8s.io/v1beta1":
-		return upgradeCRDV1Beta1(ctx, k8sClient, jsonCRD)
+		return c.upgradeCRDV1Beta1(ctx, k8sClient, jsonCRD)
 	case "apiextensions.k8s.io/v1":
-		return upgradeCRDV1(ctx, k8sClient, jsonCRD)
+		return c.upgradeCRDV1(ctx, k8sClient, jsonCRD)
 	}
 }
 
-func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+func (c *HelmClient) upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
 	var crdObj v1beta1.CustomResourceDefinition
 	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
 		return err
@@ -627,7 +627,7 @@ func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []by
 	return nil
 }
 
-func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+func (c *HelmClient) upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
 	var crdObj v1.CustomResourceDefinition
 	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
 		return err
