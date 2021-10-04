@@ -112,6 +112,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		storage:      &storage,
 		ActionConfig: actionConfig,
 		linting:      options.Linting,
+		DebugLog:     debugLog,
 	}, nil
 }
 
@@ -166,7 +167,7 @@ func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 	}
 
 	if c.storage.Has(entry.Name) {
-		log.Printf("WARNING: repository name %q already exists", entry.Name)
+		c.DebugLog("WARNING: repository name %q already exists", entry.Name)
 		return nil
 	}
 
@@ -311,7 +312,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 		return rel, err
 	}
 
-	log.Printf("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
@@ -349,7 +350,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 	}
 
 	if !spec.SkipCRDs && spec.UpgradeCRDs {
-		log.Printf("upgrading crds")
+		c.DebugLog("upgrading crds")
 		err = c.upgradeCRDs(ctx, helmChart)
 		if err != nil {
 			return nil, err
@@ -361,7 +362,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return rel, err
 	}
 
-	log.Printf("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
@@ -381,7 +382,7 @@ func (c *HelmClient) deleteChartFromCache(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("chart removed successfully: %s/%s-%s", helmChart.Name(), spec.ReleaseName, helmChart.AppVersion())
+	c.DebugLog("chart removed successfully: %s/%s-%s", helmChart.Name(), spec.ReleaseName, helmChart.AppVersion())
 
 	return nil
 }
@@ -397,7 +398,7 @@ func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
 		return err
 	}
 
-	log.Printf("release uninstalled, response: %v", resp)
+	c.DebugLog("release uninstalled, response: %v", resp)
 
 	return nil
 }
@@ -411,7 +412,7 @@ func (c *HelmClient) uninstallReleaseByName(name string) error {
 		return err
 	}
 
-	log.Printf("release uninstalled, response: %v", resp)
+	c.DebugLog("release uninstalled, response: %v", resp)
 
 	return nil
 }
@@ -423,7 +424,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 	result := client.Run([]string{chartPath}, values)
 
 	for _, err := range result.Errors {
-		log.Printf("Error %s", err)
+		c.DebugLog("Error %s", err)
 	}
 
 	if len(result.Errors) > 0 {
@@ -524,6 +525,10 @@ func (c *HelmClient) LintChart(spec *ChartSpec) error {
 	return c.lint(chartPath, values)
 }
 
+func (c *HelmClient) SetDebugLog(debugLog action.DebugLog) {
+	c.DebugLog = debugLog
+}
+
 // upgradeCRDs upgrades the CRDs of the provided chart
 func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
 	cfg, err := c.ActionConfig.RESTClientGetter.ToRESTConfig()
@@ -540,7 +545,7 @@ func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart
 		if err := c.upgradeCRD(ctx, k8sClient, crd); err != nil {
 			return err
 		}
-		log.Printf("CRD %s upgraded successfully for chart: %s", crd.Name, chartInstance.Metadata.Name)
+		c.DebugLog("CRD %s upgraded successfully for chart: %s", crd.Name, chartInstance.Metadata.Name)
 	}
 
 	return nil
@@ -564,13 +569,13 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 	default:
 		return fmt.Errorf("WARNING: failed to upgrade CRD %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
 	case "apiextensions.k8s.io/v1beta1":
-		return upgradeCRDV1Beta1(ctx, k8sClient, jsonCRD)
+		return c.upgradeCRDV1Beta1(ctx, k8sClient, jsonCRD)
 	case "apiextensions.k8s.io/v1":
-		return upgradeCRDV1(ctx, k8sClient, jsonCRD)
+		return c.upgradeCRDV1(ctx, k8sClient, jsonCRD)
 	}
 }
 
-func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+func (c *HelmClient) upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
 	var crdObj v1beta1.CustomResourceDefinition
 	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
 		return err
@@ -604,7 +609,7 @@ func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []by
 	}
 
 	if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-		log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+		c.DebugLog("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 		return nil
 	}
 
@@ -612,17 +617,17 @@ func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []by
 	if _, err := cl.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}}); err != nil {
 		return err
 	}
-	log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+	c.DebugLog("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
 
 	if _, err = cl.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{}); err != nil {
 		return err
 	}
-	log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
+	c.DebugLog("upgrade ran successful for CRD: %s", crdObj.Name)
 
 	return nil
 }
 
-func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+func (c *HelmClient) upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
 	var crdObj v1.CustomResourceDefinition
 	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
 		return err
@@ -635,7 +640,7 @@ func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) e
 
 	// Check to ensure that no previously existing API version is deleted through the upgrade.
 	if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
-		log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
+		c.DebugLog("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
 		return nil
 	}
 
@@ -663,7 +668,7 @@ func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) e
 	}
 
 	if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-		log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+		c.DebugLog("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
 		return nil
 	}
 
@@ -671,12 +676,12 @@ func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) e
 	if _, err := cl.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}}); err != nil {
 		return err
 	}
-	log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+	c.DebugLog("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
 
 	if _, err := cl.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{}); err != nil {
 		return err
 	}
-	log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
+	c.DebugLog("upgrade ran successful for CRD: %s", crdObj.Name)
 
 	return nil
 }
@@ -694,7 +699,7 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	}
 
 	if helmChart.Metadata.Deprecated {
-		log.Printf("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
 	}
 
 	return helmChart, chartPath, err
