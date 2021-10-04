@@ -563,117 +563,120 @@ func (c *HelmClient) upgradeCRD(ctx context.Context, k8sClient *clientset.Client
 	switch typeMeta.APIVersion {
 	default:
 		return fmt.Errorf("WARNING: failed to upgrade CRD %q: unsupported api-version %q", crd.Name, typeMeta.APIVersion)
-
 	case "apiextensions.k8s.io/v1beta1":
-		var crdObj v1beta1.CustomResourceDefinition
-		err = json.Unmarshal(jsonCRD, &crdObj)
-		if err != nil {
-			return err
-		}
-		existingCRDObj, err := k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-
-		// Check that the storage version does not change through the update.
-		oldStorageVersion := v1beta1.CustomResourceDefinitionVersion{}
-
-		for _, oldVersion := range existingCRDObj.Spec.Versions {
-			if oldVersion.Storage {
-				oldStorageVersion = oldVersion
-			}
-		}
-
-		i := 0
-
-		for _, newVersion := range crdObj.Spec.Versions {
-			if newVersion.Storage {
-				i++
-				if newVersion.Name != oldStorageVersion.Name {
-					return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
-				}
-			}
-			if i > 1 {
-				return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
-			}
-		}
-
-		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-			log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
-			break
-		}
-
-		crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-		_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}})
-		if err != nil {
-			return err
-		}
-		log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
-
-		_, err = k8sClient.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{})
-		if err != nil {
-			return err
-		}
-		log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
-
+		return upgradeCRDV1Beta1(ctx, k8sClient, jsonCRD)
 	case "apiextensions.k8s.io/v1":
-		var crdObj v1.CustomResourceDefinition
-		err = json.Unmarshal(jsonCRD, &crdObj)
-		if err != nil {
-			return err
-		}
-		existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-
-		// Check to ensure that no previously existing API version is deleted through the upgrade.
-		if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
-			log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
-			break
-		}
-
-		// Check that the storage version does not change through the update.
-		oldStorageVersion := v1.CustomResourceDefinitionVersion{}
-
-		for _, oldVersion := range existingCRDObj.Spec.Versions {
-			if oldVersion.Storage {
-				oldStorageVersion = oldVersion
-			}
-		}
-
-		i := 0
-
-		for _, newVersion := range crdObj.Spec.Versions {
-			if newVersion.Storage {
-				i++
-				if newVersion.Name != oldStorageVersion.Name {
-					return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
-				}
-			}
-			if i > 1 {
-				return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
-			}
-		}
-
-		if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
-			log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
-			break
-		}
-
-		crdObj.ResourceVersion = existingCRDObj.ResourceVersion
-		_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}})
-		if err != nil {
-			return err
-		}
-		log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
-
-		_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{})
-		if err != nil {
-			return err
-		}
-		log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
+		return upgradeCRDV1(ctx, k8sClient, jsonCRD)
 	}
+}
+
+func upgradeCRDV1Beta1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+	var crdObj v1beta1.CustomResourceDefinition
+	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
+		return err
+	}
+	existingCRDObj, err := cl.ApiextensionsV1beta1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Check that the storage version does not change through the update.
+	oldStorageVersion := v1beta1.CustomResourceDefinitionVersion{}
+
+	for _, oldVersion := range existingCRDObj.Spec.Versions {
+		if oldVersion.Storage {
+			oldStorageVersion = oldVersion
+		}
+	}
+
+	i := 0
+
+	for _, newVersion := range crdObj.Spec.Versions {
+		if newVersion.Storage {
+			i++
+			if newVersion.Name != oldStorageVersion.Name {
+				return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
+			}
+		}
+		if i > 1 {
+			return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
+		}
+	}
+
+	if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
+		log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+		return nil
+	}
+
+	crdObj.ResourceVersion = existingCRDObj.ResourceVersion
+	if _, err := cl.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}}); err != nil {
+		return err
+	}
+	log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+
+	if _, err = cl.ApiextensionsV1beta1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{}); err != nil {
+		return err
+	}
+	log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
+
+	return nil
+}
+
+func upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, rawCRD []byte) error {
+	var crdObj v1.CustomResourceDefinition
+	if err := json.Unmarshal(rawCRD, &crdObj); err != nil {
+		return err
+	}
+
+	existingCRDObj, err := cl.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Check to ensure that no previously existing API version is deleted through the upgrade.
+	if len(existingCRDObj.Spec.Versions) > len(crdObj.Spec.Versions) {
+		log.Printf("WARNING: new version of CRD %q would remove an existing API version, skipping upgrade", crdObj.Name)
+		return nil
+	}
+
+	// Check that the storage version does not change through the update.
+	oldStorageVersion := v1.CustomResourceDefinitionVersion{}
+
+	for _, oldVersion := range existingCRDObj.Spec.Versions {
+		if oldVersion.Storage {
+			oldStorageVersion = oldVersion
+		}
+	}
+
+	i := 0
+
+	for _, newVersion := range crdObj.Spec.Versions {
+		if newVersion.Storage {
+			i++
+			if newVersion.Name != oldStorageVersion.Name {
+				return fmt.Errorf("ERROR: storage version of CRD %q changed, aborting upgrade", crdObj.Name)
+			}
+		}
+		if i > 1 {
+			return fmt.Errorf("ERROR: more than one storage version set on CRD %q, aborting upgrade", crdObj.Name)
+		}
+	}
+
+	if reflect.DeepEqual(existingCRDObj.Spec.Versions, crdObj.Spec.Versions) {
+		log.Printf("INFO: new version of CRD %q contains no changes, skipping upgrade", crdObj.Name)
+		return nil
+	}
+
+	crdObj.ResourceVersion = existingCRDObj.ResourceVersion
+	if _, err := cl.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{DryRun: []string{"All"}}); err != nil {
+		return err
+	}
+	log.Printf("upgrade ran successful for CRD (dry run): %s", crdObj.Name)
+
+	if _, err := cl.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metav1.UpdateOptions{}); err != nil {
+		return err
+	}
+	log.Printf("upgrade ran successful for CRD: %s", crdObj.Name)
 
 	return nil
 }
