@@ -185,21 +185,6 @@ func ExampleHelmClient_TemplateChart() {
 	}
 }
 
-func ExampleHelmClient_DeleteChartFromCache() {
-	// Define the chart to be deleted from the client's cache
-	chartSpec := ChartSpec{
-		ReleaseName: "etcd-operator",
-		ChartName:   "stable/etcd-operator",
-		Namespace:   "default",
-		UpgradeCRDs: true,
-		Wait:        true,
-	}
-
-	if err := helmClient.DeleteChartFromCache(&chartSpec); err != nil {
-		panic(err)
-	}
-}
-
 func ExampleHelmClient_UpdateChartRepos() {
 	if err := helmClient.UpdateChartRepos(); err != nil {
 		panic(err)
