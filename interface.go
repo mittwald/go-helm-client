@@ -10,6 +10,7 @@ import (
 
 //go:generate mockgen -source=interface.go -package mockhelmclient -destination=./mock/interface.go -self_package=. Client
 
+// Client holds the method signatures for a Helm client.
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
@@ -23,4 +24,5 @@ type Client interface {
 	TemplateChart(spec *ChartSpec) ([]byte, error)
 	LintChart(spec *ChartSpec) error
 	SetDebugLog(debugLog action.DebugLog)
+	ListReleaseHistory(name string, max int) ([]*release.Release, error)
 }

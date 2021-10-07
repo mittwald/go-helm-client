@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// NewRESTClientGetter
+// NewRESTClientGetter returns a RESTClientGetter using the provided 'namespace', 'kubeConfig' and 'restConfig'.
 //
 // source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
 func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config) *RESTClientGetter {
@@ -29,15 +29,16 @@ func (c *RESTClientGetter) ToRESTConfig() (*rest.Config, error) {
 	return clientcmd.RESTConfigFromKubeConfig(c.kubeConfig)
 }
 
+// ToDiscoveryClient returns a CachedDiscoveryInterface that can be used as a discovery client.
 func (c *RESTClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
 	config, err := c.ToRESTConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	// The more groups you have, the more discovery requests you need to make.
-	// given 25 groups (our groups + a few custom conf) with one-ish version each, discovery needs to make 50 requests
-	// double it just so we don't end up here again for a while.  This config is only used for discovery.
+	// The more API groups exist, the more discovery requests need to be made.
+	// Given 25 API groups with about one version each, discovery needs to make 50 requests.
+	// This setting is only used for discovery.
 	config.Burst = 100
 
 	discoveryClient, _ := discovery.NewDiscoveryClientForConfig(config)

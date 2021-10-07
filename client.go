@@ -500,8 +500,19 @@ func (c *HelmClient) LintChart(spec *ChartSpec) error {
 	return c.lint(chartPath, values)
 }
 
+// SetDebugLog set's a Helm client's DebugLog to the desired 'debugLog'.
 func (c *HelmClient) SetDebugLog(debugLog action.DebugLog) {
 	c.DebugLog = debugLog
+}
+
+// ListReleaseHistory lists the last 'max' number of entries
+// in the history of the release identified by 'name'.
+func (c *HelmClient) ListReleaseHistory(name string, max int) ([]*release.Release, error) {
+	client := action.NewHistory(c.ActionConfig)
+
+	client.Max = max
+
+	return client.Run(name)
 }
 
 // upgradeCRDs upgrades the CRDs of the provided chart
@@ -682,9 +693,7 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 
 // chartIsInstalled checks whether a chart is already installed or not by the provided release name
 func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
-	histClient := action.NewHistory(c.ActionConfig)
-	histClient.Max = 1
-	if _, err := histClient.Run(release); err == driver.ErrReleaseNotFound {
+	if _, err := c.ListReleaseHistory(release, 1); err == driver.ErrReleaseNotFound {
 		return false, nil
 	} else if err != nil {
 		return false, err

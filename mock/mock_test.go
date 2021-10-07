@@ -15,6 +15,9 @@ func TestHelmClientInterfaces(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockClient := NewMockClient(ctrl)
+	if mockClient == nil {
+		t.Fail()
+	}
 
 	t.Run("UpdateChartRepos", func(t *testing.T) {
 		mockClient.EXPECT().UpdateChartRepos().Return(nil)
