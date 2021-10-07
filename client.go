@@ -238,11 +238,6 @@ func (c *HelmClient) RollbackRelease(spec *ChartSpec, version int) error {
 	return c.rollbackRelease(spec, version)
 }
 
-// DeleteChartFromCache deletes the provided chart from the client's cache
-func (c *HelmClient) DeleteChartFromCache(spec *ChartSpec) error {
-	return c.deleteChartFromCache(spec)
-}
-
 // UninstallRelease uninstalls the provided release
 func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 	return c.uninstallRelease(spec)
@@ -365,26 +360,6 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
-}
-
-// deleteChartFromCache deletes the provided chart from the client's cache
-func (c *HelmClient) deleteChartFromCache(spec *ChartSpec) error {
-	client := action.NewChartRemove(c.ActionConfig)
-
-	helmChart, _, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
-	if err != nil {
-		return err
-	}
-
-	var deleteOutputBuffer bytes.Buffer
-	err = client.Run(&deleteOutputBuffer, helmChart.Name())
-	if err != nil {
-		return err
-	}
-
-	c.DebugLog("chart removed successfully: %s/%s-%s", helmChart.Name(), spec.ReleaseName, helmChart.AppVersion())
-
-	return nil
 }
 
 // uninstallRelease uninstalls the provided release

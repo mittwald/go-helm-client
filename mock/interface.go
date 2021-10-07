@@ -52,20 +52,6 @@ func (mr *MockClientMockRecorder) AddOrUpdateChartRepo(entry interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrUpdateChartRepo", reflect.TypeOf((*MockClient)(nil).AddOrUpdateChartRepo), entry)
 }
 
-// DeleteChartFromCache mocks base method.
-func (m *MockClient) DeleteChartFromCache(spec *helmclient.ChartSpec) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteChartFromCache", spec)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteChartFromCache indicates an expected call of DeleteChartFromCache.
-func (mr *MockClientMockRecorder) DeleteChartFromCache(spec interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChartFromCache", reflect.TypeOf((*MockClient)(nil).DeleteChartFromCache), spec)
-}
-
 // GetRelease mocks base method.
 func (m *MockClient) GetRelease(name string) (*release.Release, error) {
 	m.ctrl.T.Helper()
