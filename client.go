@@ -307,7 +307,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 		return rel, err
 	}
 
-	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Chart.Metadata.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
