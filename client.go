@@ -146,7 +146,7 @@ func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 	}
 
 	settings.RepositoryCache = options.RepositoryCache
-	settings.RepositoryConfig = defaultRepositoryConfigPath
+	settings.RepositoryConfig = options.RepositoryConfig
 	settings.Debug = options.Debug
 
 	return nil
