@@ -146,7 +146,7 @@ func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 	}
 
 	settings.RepositoryCache = options.RepositoryCache
-	settings.RepositoryConfig = defaultRepositoryConfigPath
+	settings.RepositoryConfig = options.RepositoryConfig
 	settings.Debug = options.Debug
 
 	return nil
@@ -307,7 +307,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 		return rel, err
 	}
 
-	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release installed successfully: %s/%s-%s", rel.Name, rel.Chart.Metadata.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
