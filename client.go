@@ -754,6 +754,7 @@ func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client
 func mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
+	installOptions.CreateNamespace = chartSpec.CreateNamespace
 	installOptions.DisableHooks = chartSpec.DisableHooks
 	installOptions.Replace = chartSpec.Replace
 	installOptions.Wait = chartSpec.Wait

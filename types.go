@@ -67,6 +67,9 @@ type ChartSpec struct {
 	Version string `json:"version,omitempty"`
 
 	// +optional
+	CreateNamespace bool `json:"createNamespace,omitempty"`
+
+	// +optional
 	DisableHooks bool `json:"disableHooks,omitempty"`
 
 	// +optional
