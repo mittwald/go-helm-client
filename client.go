@@ -357,7 +357,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return rel, err
 	}
 
-	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Chart.Metadata.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
@@ -754,6 +754,7 @@ func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client
 func mergeInstallOptions(chartSpec *ChartSpec, installOptions *action.Install) {
+	installOptions.CreateNamespace = chartSpec.CreateNamespace
 	installOptions.DisableHooks = chartSpec.DisableHooks
 	installOptions.Replace = chartSpec.Replace
 	installOptions.Wait = chartSpec.Wait
