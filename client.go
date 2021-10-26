@@ -357,7 +357,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return rel, err
 	}
 
-	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Chart.Metadata.Name, rel.Chart.Metadata.Version)
 
 	return rel, nil
 }
