@@ -19,7 +19,6 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
-	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -55,10 +54,6 @@ func NewClientFromKubeConf(options *KubeConfClientOptions) (Client, error) {
 	}
 
 	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil)
-	err := setEnvSettings(options.Options, settings)
-	if err != nil {
-		return nil, err
-	}
 
 	if options.KubeContext != "" {
 		settings.KubeContext = options.KubeContext
@@ -200,11 +195,9 @@ func (c *HelmClient) UpdateChartRepos() error {
 	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 }
 
-// InstallOrUpgradeChart triggers the installation of the provided
-// chart and returns the installed / upgraded release.
-// If the chart is already installed, trigger an upgrade instead.
+// InstallOrUpgradeChart installs or upgrades the provided chart and returns the corresponding release.
 func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
-	installed, err := c.chartIsInstalled(spec.ReleaseName)
+	installed, err := c.chartIsInstalled(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -691,18 +684,25 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	return helmChart, chartPath, err
 }
 
-// chartIsInstalled checks whether a chart is already installed or not by the provided release name
-func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
-	if _, err := c.ListReleaseHistory(release, 1); err == driver.ErrReleaseNotFound {
-		return false, nil
-	} else if err != nil {
+// chartIsInstalled checks whether a chart is already installed
+// in a namespace or not based on the provided chart spec.
+// Note that this function only considers the contained chart name and namespace.
+func (c *HelmClient) chartIsInstalled(spec *ChartSpec) (bool, error) {
+	releases, err := c.listDeployedReleases()
+	if err != nil {
 		return false, err
 	}
 
-	return true, nil
+	for _, r := range releases {
+		if r.Name == spec.ReleaseName && r.Namespace == spec.Namespace {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
-// listDeployedReleases lists all deployed helm releases
+// listDeployedReleases lists all deployed helm releases.
 func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
 
