@@ -11,6 +11,7 @@ import (
 //go:generate mockgen -source=interface.go -package mockhelmclient -destination=./mock/interface.go -self_package=. Client
 
 // Client holds the method signatures for a Helm client.
+// NOTE: This is an interface to allow for mocking in tests.
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
