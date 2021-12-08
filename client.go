@@ -203,7 +203,7 @@ func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 		return c.upgrade(ctx, spec)
 	}
 
-	return c.install(spec)
+	return c.install(ctx, spec)
 }
 
 // ListDeployedReleases lists all deployed releases.
@@ -240,7 +240,7 @@ func (c *HelmClient) UninstallReleaseByName(name string) error {
 
 // install installs the provided chart.
 // Optionally lints the chart if the linting flag is set.
-func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
+func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
 
@@ -293,7 +293,7 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 		}
 	}
 
-	rel, err := client.Run(helmChart, values)
+	rel, err := client.RunWithContext(ctx, helmChart, values)
 	if err != nil {
 		return rel, err
 	}
@@ -344,7 +344,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		}
 	}
 
-	rel, err := client.Run(spec.ReleaseName, helmChart, values)
+	rel, err := client.RunWithContext(ctx, spec.ReleaseName, helmChart, values)
 	if err != nil {
 		return rel, err
 	}
