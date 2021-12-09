@@ -2,13 +2,10 @@ module github.com/mittwald/go-helm-client
 
 go 1.17
 
-// required until https://github.com/helm/helm/issues/10439 is part of a new tag (> v3.7.1)
-replace helm.sh/helm/v3 => helm.sh/helm/v3 v3.6.1-0.20211207164812-8ca401398d8b
-
 require (
 	github.com/golang/mock v1.6.0
 	github.com/spf13/pflag v1.0.5
-	helm.sh/helm/v3 v3.7.1
+	helm.sh/helm/v3 v3.7.2
 	k8s.io/apiextensions-apiserver v0.22.4
 	k8s.io/apimachinery v0.22.4
 	k8s.io/cli-runtime v0.22.4
