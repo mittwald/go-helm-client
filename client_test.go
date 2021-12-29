@@ -73,7 +73,7 @@ func ExampleHelmClient_AddOrUpdateChartRepo_public() {
 	// Define a public chart repository.
 	chartRepo := repo.Entry{
 		Name: "stable",
-		URL:  "https://kubernetes-charts.storage.googleapis.com",
+		URL:  "https://charts.helm.sh/stable",
 	}
 
 	// Add a chart-repository to the client.
