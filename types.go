@@ -29,13 +29,16 @@ type RestConfClientOptions struct {
 
 // Options defines the options of a client.
 type Options struct {
-	Namespace        string
-	RepositoryConfig string
-	RepositoryCache  string
-	Debug            bool
-	Linting          bool
-	DebugLog         action.DebugLog
+	Namespace           string
+	RepositoryConfig    string
+	RepositoryCache     string
+	Debug               bool
+	Linting             bool
+	DebugLog            action.DebugLog
+	CheckChartInstalled CheckChartInstalledFunc
 }
+
+type CheckChartInstalledFunc func(*ChartSpec) (bool, error)
 
 // RESTClientGetter defines the values of a helm REST client.
 type RESTClientGetter struct {
@@ -51,9 +54,10 @@ type HelmClient struct {
 	Providers getter.Providers
 	storage   *repo.File
 	// ActionConfig is the helm action configuration.
-	ActionConfig *action.Configuration
-	linting      bool
-	DebugLog     action.DebugLog
+	ActionConfig        *action.Configuration
+	linting             bool
+	DebugLog            action.DebugLog
+	CheckChartInstalled CheckChartInstalledFunc
 }
 
 // ChartSpec defines the values of a helm chart

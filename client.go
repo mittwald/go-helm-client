@@ -98,12 +98,13 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 	}
 
 	return &HelmClient{
-		Settings:     settings,
-		Providers:    getter.All(settings),
-		storage:      &storage,
-		ActionConfig: actionConfig,
-		linting:      options.Linting,
-		DebugLog:     debugLog,
+		Settings:            settings,
+		Providers:           getter.All(settings),
+		storage:             &storage,
+		ActionConfig:        actionConfig,
+		linting:             options.Linting,
+		DebugLog:            debugLog,
+		CheckChartInstalled: options.CheckChartInstalled,
 	}, nil
 }
 
@@ -686,10 +687,15 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	return helmChart, chartPath, err
 }
 
-// chartIsInstalled checks whether a chart is already installed
-// in a namespace or not based on the provided chart spec.
-// Note that this function only considers the contained chart name and namespace.
+// chartIsInstalled checks whether a chart is already installed based on the
+// provided chart spec, optionally with a custom CheckChartInstalled function. By
+// default, this function only considers the contained chart name and namespace
+// of deployed releases.
 func (c *HelmClient) chartIsInstalled(spec *ChartSpec) (bool, error) {
+	if c.CheckChartInstalled != nil {
+		return c.CheckChartInstalled(spec)
+	}
+
 	releases, err := c.listDeployedReleases()
 	if err != nil {
 		return false, err
