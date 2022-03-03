@@ -206,6 +206,14 @@ func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 	return c.install(ctx, spec)
 }
 
+func (c *HelmClient) InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+	return c.install(ctx, spec)
+}
+
+func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+	return c.upgrade(ctx, spec)
+}
+
 // ListDeployedReleases lists all deployed releases.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
