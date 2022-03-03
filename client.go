@@ -479,7 +479,9 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 
 // LintChart fetches a chart using the provided ChartSpec 'spec' and lints it's values.
 func (c *HelmClient) LintChart(spec *ChartSpec) error {
-	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{})
+	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{
+		Version: spec.Version,
+	})
 	if err != nil {
 		return err
 	}
