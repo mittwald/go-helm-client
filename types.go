@@ -8,6 +8,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/postrender"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -130,4 +131,7 @@ type ChartSpec struct {
 	// DryRun indicates whether to perform a dry run.
 	// +optional
 	DryRun bool `json:"dryRun,omitempty"`
+	// PostRenderer to run on the Helm Chart
+	// +optional
+	PostRenderer postrender.PostRenderer `json:"postRenderer,omitempty"`
 }
