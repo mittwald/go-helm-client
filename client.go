@@ -194,22 +194,36 @@ func (c *HelmClient) UpdateChartRepos() error {
 // InstallOrUpgradeChart installs or upgrades the provided chart and returns the corresponding release.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
-	installed, err := c.chartIsInstalled(spec)
+	exists, err := c.chartExists(spec)
 	if err != nil {
 		return nil, err
 	}
 
-	if installed {
+	if exists {
 		return c.upgrade(ctx, spec)
 	}
 
 	return c.install(ctx, spec)
 }
 
+func (c *HelmClient) InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+	return c.install(ctx, spec)
+}
+
+func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+	return c.upgrade(ctx, spec)
+}
+
 // ListDeployedReleases lists all deployed releases.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
-	return c.listDeployedReleases()
+	return c.listReleases(action.ListDeployed)
+}
+
+// ListReleasesByStateMask lists all releases filtered by stateMask.
+// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
+func (c *HelmClient) ListReleasesByStateMask(states action.ListStates) ([]*release.Release, error) {
+	return c.listReleases(states)
 }
 
 // GetReleaseValues returns the (optionally, all computed) values for the specified release.
@@ -312,6 +326,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	client := action.NewUpgrade(c.ActionConfig)
 	mergeUpgradeOptions(spec, client)
+	client.Install = true
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -696,11 +711,11 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	return helmChart, chartPath, err
 }
 
-// chartIsInstalled checks whether a chart is already installed
+// chartExists checks whether a chart is already installed
 // in a namespace or not based on the provided chart spec.
 // Note that this function only considers the contained chart name and namespace.
-func (c *HelmClient) chartIsInstalled(spec *ChartSpec) (bool, error) {
-	releases, err := c.listDeployedReleases()
+func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
+	releases, err := c.listReleases(action.ListAll)
 	if err != nil {
 		return false, err
 	}
@@ -714,11 +729,10 @@ func (c *HelmClient) chartIsInstalled(spec *ChartSpec) (bool, error) {
 	return false, nil
 }
 
-// listDeployedReleases lists all deployed helm releases.
-func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
+// listReleases lists all releases that match the given state.
+func (c *HelmClient) listReleases(state action.ListStates) ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
-
-	listClient.StateMask = action.ListDeployed
+	listClient.StateMask = state
 
 	return listClient.Run()
 }

@@ -82,6 +82,21 @@ func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseValues", reflect.TypeOf((*MockClient)(nil).GetReleaseValues), name, allValues)
 }
 
+// InstallChart mocks base method.
+func (m *MockClient) InstallChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InstallChart", ctx, spec)
+	ret0, _ := ret[0].(*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InstallChart indicates an expected call of InstallChart.
+func (mr *MockClientMockRecorder) InstallChart(ctx, spec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallChart", reflect.TypeOf((*MockClient)(nil).InstallChart), ctx, spec)
+}
+
 // InstallOrUpgradeChart mocks base method.
 func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
 	m.ctrl.T.Helper()
@@ -139,6 +154,21 @@ func (m *MockClient) ListReleaseHistory(name string, max int) ([]*release.Releas
 func (mr *MockClientMockRecorder) ListReleaseHistory(name, max interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleaseHistory", reflect.TypeOf((*MockClient)(nil).ListReleaseHistory), name, max)
+}
+
+// ListReleasesByStateMask mocks base method.
+func (m *MockClient) ListReleasesByStateMask(arg0 action.ListStates) ([]*release.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListReleasesByStateMask", arg0)
+	ret0, _ := ret[0].([]*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListReleasesByStateMask indicates an expected call of ListReleasesByStateMask.
+func (mr *MockClientMockRecorder) ListReleasesByStateMask(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleasesByStateMask", reflect.TypeOf((*MockClient)(nil).ListReleasesByStateMask), arg0)
 }
 
 // RollbackRelease mocks base method.
@@ -222,4 +252,19 @@ func (m *MockClient) UpdateChartRepos() error {
 func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChartRepos", reflect.TypeOf((*MockClient)(nil).UpdateChartRepos))
+}
+
+// UpgradeChart mocks base method.
+func (m *MockClient) UpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpgradeChart", ctx, spec)
+	ret0, _ := ret[0].(*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpgradeChart indicates an expected call of UpgradeChart.
+func (mr *MockClientMockRecorder) UpgradeChart(ctx, spec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpgradeChart", reflect.TypeOf((*MockClient)(nil).UpgradeChart), ctx, spec)
 }
