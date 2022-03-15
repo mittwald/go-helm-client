@@ -290,6 +290,13 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
+	// 使用用户设置的Set覆盖values文件里面的值
+	if spec.Sets != nil && len(spec.Sets) > 0 {
+		for key, value := range spec.Sets {
+			values[key] = value
+		}
+	}
+
 	if c.linting {
 		err = c.lint(chartPath, values)
 		if err != nil {
@@ -335,6 +342,13 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 	values, err := spec.GetValuesMap()
 	if err != nil {
 		return nil, err
+	}
+
+	// 使用用户设置的Set覆盖values文件里面的值
+	if spec.Sets != nil && len(spec.Sets) > 0 {
+		for key, value := range spec.Sets {
+			values[key] = value
+		}
 	}
 
 	if c.linting {
