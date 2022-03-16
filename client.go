@@ -328,7 +328,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.PostRenderer = spec.PostRenderer
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.getChartLocal(spec.ChartName, &client.ChartPathOptions, spec.LocalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -696,6 +696,32 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
 	if err != nil {
 		return nil, "", err
+	}
+
+	helmChart, err := loader.Load(chartPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if helmChart.Metadata.Deprecated {
+		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+	}
+
+	return helmChart, chartPath, err
+}
+
+// 有限从本地读取char 文件，如果没有设置本地地址 则从远程repo仓库读取
+// getChart returns a chart matching the provided chart name and options.
+func (c *HelmClient) getChartLocal(chartName string, chartPathOptions *action.ChartPathOptions, localPath string) (*chart.Chart, string, error) {
+	chartPath := ""
+	if localPath != "" && len(localPath) > 0 {
+		chartPath = localPath
+	} else {
+		repoChartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
+		if err != nil {
+			return nil, "", err
+		}
+		chartPath = repoChartPath
 	}
 
 	helmChart, err := loader.Load(chartPath)
