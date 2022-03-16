@@ -19,6 +19,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
+	"helm.sh/helm/v3/pkg/strvals"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -252,7 +253,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.PostRenderer = spec.PostRenderer
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.getChartLocal(spec.ChartName, &client.ChartPathOptions, spec.LocalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -290,10 +291,13 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	// 使用用户设置的Set覆盖values文件里面的值
-	if spec.Sets != nil && len(spec.Sets) > 0 {
-		for key, value := range spec.Sets {
-			values[key] = value
+	if values == nil {
+		values = make(map[string]interface{})
+	}
+	// User specified a value via --set-string
+	for _, value := range spec.Sets {
+		if err := strvals.ParseInto(value, values); err != nil {
+			return nil, fmt.Errorf("failed parsing --set-string data error:%v", err)
 		}
 	}
 
@@ -328,7 +332,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.PostRenderer = spec.PostRenderer
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.getChartLocal(spec.ChartName, &client.ChartPathOptions, spec.LocalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -344,10 +348,10 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	// 使用用户设置的Set覆盖values文件里面的值
-	if spec.Sets != nil && len(spec.Sets) > 0 {
-		for key, value := range spec.Sets {
-			values[key] = value
+	// User specified a value via --set-string
+	for _, value := range spec.Sets {
+		if err := strvals.ParseInto(value, values); err != nil {
+			return nil, fmt.Errorf("failed parsing --set-string data error:%v", err)
 		}
 	}
 
@@ -696,6 +700,32 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
 	if err != nil {
 		return nil, "", err
+	}
+
+	helmChart, err := loader.Load(chartPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if helmChart.Metadata.Deprecated {
+		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+	}
+
+	return helmChart, chartPath, err
+}
+
+// 有限从本地读取char 文件，如果没有设置本地地址 则从远程repo仓库读取
+// getChart returns a chart matching the provided chart name and options.
+func (c *HelmClient) getChartLocal(chartName string, chartPathOptions *action.ChartPathOptions, localPath string) (*chart.Chart, string, error) {
+	chartPath := ""
+	if localPath != "" && len(localPath) > 0 {
+		chartPath = localPath
+	} else {
+		repoChartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
+		if err != nil {
+			return nil, "", err
+		}
+		chartPath = repoChartPath
 	}
 
 	helmChart, err := loader.Load(chartPath)
