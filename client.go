@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
+	"helm.sh/helm/v3/pkg/strvals"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -252,7 +254,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.PostRenderer = spec.PostRenderer
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.getChartLocal(spec.ChartName, &client.ChartPathOptions, spec.LocalPath)
 	if err != nil {
 		return nil, err
 	}
@@ -290,10 +292,10 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	// 使用用户设置的Set覆盖values文件里面的值
-	if spec.Sets != nil && len(spec.Sets) > 0 {
-		for key, value := range spec.Sets {
-			values[key] = value
+	// User specified a value via --set-string
+	for _, value := range spec.Sets {
+		if err := strvals.ParseIntoString(value, values); err != nil {
+			return nil, errors.New("failed parsing --set-string data")
 		}
 	}
 
@@ -344,10 +346,10 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	// 使用用户设置的Set覆盖values文件里面的值
-	if spec.Sets != nil && len(spec.Sets) > 0 {
-		for key, value := range spec.Sets {
-			values[key] = value
+	// User specified a value via --set-string
+	for _, value := range spec.Sets {
+		if err := strvals.ParseIntoString(value, values); err != nil {
+			return nil, errors.New("failed parsing --set-string data")
 		}
 	}
 
