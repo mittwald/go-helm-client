@@ -289,6 +289,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 					Getters:          c.Providers,
 					RepositoryConfig: c.Settings.RepositoryConfig,
 					RepositoryCache:  c.Settings.RepositoryCache,
+					Out:              os.Stdout,
 				}
 				if err := man.Update(); err != nil {
 					return nil, err
