@@ -100,7 +100,7 @@ type ChartSpec struct {
 	GenerateName bool `json:"generateName,omitempty"`
 	// NameTemplate is the template used to generate the release name if GenerateName is configured.
 	// +optional
-	NameTemplate string `json:"NameTemplate,omitempty"`
+	NameTemplate string `json:"nameTemplate,omitempty"`
 	// Atomic indicates whether to install resources atomically.
 	// 'Wait' will automatically be set to true when using Atomic.
 	// +optional
