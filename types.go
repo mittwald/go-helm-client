@@ -85,9 +85,9 @@ type ChartSpec struct {
 	// Wait indicates whether to wait for the release to be deployed or not.
 	// +optional
 	Wait bool `json:"wait,omitempty"`
-	// WaitForJobs if set and Wait enabled, will wait until all Jobs have
-	// been completed before marking the release as successful. It will wait
-	// for as long as Timeout
+	// WaitForJobs indicates whether to wait for completion of release Jobs before marking the release as successful.
+	// 'Wait' has to be specified for this to take effect.
+	// The timeout may be specified via the 'Timeout' field.
 	WaitForJobs bool `json:"waitForJobs,omitempty"`
 	// DependencyUpdate indicates whether to update the chart release if the dependencies have changed.
 	// +optional
