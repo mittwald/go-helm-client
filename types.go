@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"io"
 	"time"
 
 	"helm.sh/helm/v3/pkg/getter"
@@ -36,6 +37,7 @@ type Options struct {
 	Debug            bool
 	Linting          bool
 	DebugLog         action.DebugLog
+	Output           io.Writer
 }
 
 // RESTClientGetter defines the values of a helm REST client.
@@ -54,6 +56,7 @@ type HelmClient struct {
 	// ActionConfig is the helm action configuration.
 	ActionConfig *action.Configuration
 	linting      bool
+	output       io.Writer
 	DebugLog     action.DebugLog
 }
 
