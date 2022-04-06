@@ -206,10 +206,14 @@ func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 	return c.install(ctx, spec)
 }
 
+// InstallChart installs the provided chart and returns the corresponding release.
+// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	return c.install(ctx, spec)
 }
 
+// UpgradeChart upgrades the provided chart and returns the corresponding release.
+// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	return c.upgrade(ctx, spec)
 }
@@ -257,6 +261,14 @@ func (c *HelmClient) UninstallReleaseByName(name string) error {
 func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
+
+	// NameAndChart returns either the TemplateName if set,
+	// the ReleaseName if set or the generatedName as the first return value.
+	releaseName, _, err := client.NameAndChart([]string{spec.ChartName})
+	if err != nil {
+		return nil, err
+	}
+	client.ReleaseName = releaseName
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
@@ -435,6 +447,14 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	client.ClientOnly = true
 	client.APIVersions = []string{}
 	client.IncludeCRDs = true
+
+	// NameAndChart returns either the TemplateName if set,
+	// the ReleaseName if set or the generatedName as the first return value.
+	releaseName, _, err := client.NameAndChart([]string{spec.ChartName})
+	if err != nil {
+		return nil, err
+	}
+	client.ReleaseName = releaseName
 
 	if client.Version == "" {
 		client.Version = ">0.0.0-0"
