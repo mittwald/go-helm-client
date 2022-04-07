@@ -36,6 +36,7 @@ type Options struct {
 	Debug            bool
 	Linting          bool
 	DebugLog         action.DebugLog
+	RegistryConfig   string
 }
 
 // RESTClientGetter defines the values of a helm REST client.
