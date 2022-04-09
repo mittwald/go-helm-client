@@ -1,13 +1,15 @@
 package helmclient
 
 import (
+	"bytes"
 	"context"
-
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/client-go/rest"
 )
 
 func ExampleNew() {
+	var outputBuffer bytes.Buffer
+
 	opt := &Options{
 		Namespace:        "default", // Change this to the namespace you wish the client to operate in.
 		RepositoryCache:  "/tmp/.helmcache",
@@ -15,6 +17,7 @@ func ExampleNew() {
 		Debug:            true,
 		Linting:          true,
 		DebugLog:         func(format string, v ...interface{}) {},
+		Output:           &outputBuffer, // Not mandatory, leave open for default os.Stdout
 	}
 
 	helmClient, err := New(opt)

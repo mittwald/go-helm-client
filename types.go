@@ -29,7 +29,7 @@ type RestConfClientOptions struct {
 	RestConfig *rest.Config
 }
 
-// Options defines the options of a client.
+// Options defines the options of a client. If Output is not set, os.Stdout will be used.
 type Options struct {
 	Namespace        string
 	RepositoryConfig string
