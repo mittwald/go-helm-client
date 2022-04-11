@@ -86,6 +86,10 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		}
 	}
 
+	if options.Output == nil {
+		options.Output = os.Stdout
+	}
+
 	actionConfig := new(action.Configuration)
 	err = actionConfig.Init(
 		clientGetter,
@@ -104,6 +108,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		ActionConfig: actionConfig,
 		linting:      options.Linting,
 		DebugLog:     debugLog,
+		output:       options.Output,
 	}, nil
 }
 
@@ -301,6 +306,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 					Getters:          c.Providers,
 					RepositoryConfig: c.Settings.RepositoryConfig,
 					RepositoryCache:  c.Settings.RepositoryCache,
+					Out:              c.output,
 				}
 				if err := man.Update(); err != nil {
 					return nil, err
