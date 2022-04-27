@@ -296,25 +296,9 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		)
 	}
 
-	if req := helmChart.Metadata.Dependencies; req != nil {
-		if err := action.CheckDependencies(helmChart, req); err != nil {
-			if client.DependencyUpdate {
-				man := &downloader.Manager{
-					ChartPath:        chartPath,
-					Keyring:          client.ChartPathOptions.Keyring,
-					SkipUpdate:       false,
-					Getters:          c.Providers,
-					RepositoryConfig: c.Settings.RepositoryConfig,
-					RepositoryCache:  c.Settings.RepositoryCache,
-					Out:              c.output,
-				}
-				if err := man.Update(); err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, err
-			}
-		}
+	helmChart, err = updateDependencies(helmChart, &client.ChartPathOptions, chartPath, c, client.DependencyUpdate, spec)
+	if err != nil {
+		return nil, err
 	}
 
 	values, err := spec.GetValuesMap()
@@ -359,10 +343,9 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	if req := helmChart.Metadata.Dependencies; req != nil {
-		if err := action.CheckDependencies(helmChart, req); err != nil {
-			return nil, err
-		}
+	helmChart, err = updateDependencies(helmChart, &client.ChartPathOptions, chartPath, c, client.DependencyUpdate, spec)
+	if err != nil {
+		return nil, err
 	}
 
 	values, err := spec.GetValuesMap()
@@ -479,24 +462,9 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 		)
 	}
 
-	if req := helmChart.Metadata.Dependencies; req != nil {
-		if err := action.CheckDependencies(helmChart, req); err != nil {
-			if client.DependencyUpdate {
-				man := &downloader.Manager{
-					ChartPath:        chartPath,
-					Keyring:          client.ChartPathOptions.Keyring,
-					SkipUpdate:       false,
-					Getters:          c.Providers,
-					RepositoryConfig: c.Settings.RepositoryConfig,
-					RepositoryCache:  c.Settings.RepositoryCache,
-				}
-				if err := man.Update(); err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, err
-			}
-		}
+	helmChart, err = updateDependencies(helmChart, &client.ChartPathOptions, chartPath, c, client.DependencyUpdate, spec)
+	if err != nil {
+		return nil, err
 	}
 
 	values, err := spec.GetValuesMap()
@@ -792,6 +760,37 @@ func (c *HelmClient) rollbackRelease(spec *ChartSpec, version int) error {
 	return client.Run(spec.ReleaseName)
 }
 
+// updateDependencies checks dependencies for given helmChart and updates dependencies with metadata if dependencyUpdate is true. returns updated HelmChart
+func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPathOptions, chartPath string, c *HelmClient, dependencyUpdate bool, spec *ChartSpec) (*chart.Chart, error) {
+	if req := helmChart.Metadata.Dependencies; req != nil {
+		if err := action.CheckDependencies(helmChart, req); err != nil {
+			if dependencyUpdate {
+				man := &downloader.Manager{
+					ChartPath:        chartPath,
+					Keyring:          chartPathOptions.Keyring,
+					SkipUpdate:       false,
+					Getters:          c.Providers,
+					RepositoryConfig: c.Settings.RepositoryConfig,
+					RepositoryCache:  c.Settings.RepositoryCache,
+					Out:              c.output,
+				}
+				if err := man.Update(); err != nil {
+					return nil, err
+				}
+
+				helmChart, _, err = c.getChart(spec.ChartName, chartPathOptions)
+				if err != nil {
+					return nil, err
+				}
+
+			} else {
+				return nil, err
+			}
+		}
+	}
+	return helmChart, nil
+}
+
 // mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client.
 func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback) {
 	rollbackOptions.DisableHooks = chartSpec.DisableHooks
@@ -831,6 +830,7 @@ func mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
 	upgradeOptions.Namespace = chartSpec.Namespace
 	upgradeOptions.Timeout = chartSpec.Timeout
 	upgradeOptions.Wait = chartSpec.Wait
+	upgradeOptions.DependencyUpdate = chartSpec.DependencyUpdate
 	upgradeOptions.DisableHooks = chartSpec.DisableHooks
 	upgradeOptions.Force = chartSpec.Force
 	upgradeOptions.ResetValues = chartSpec.ResetValues
