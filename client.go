@@ -778,7 +778,7 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 					return nil, err
 				}
 
-				helmChart, chartPath, err = c.getChart(spec.ChartName, chartPathOptions)
+				helmChart, _, err = c.getChart(spec.ChartName, chartPathOptions)
 				if err != nil {
 					return nil, err
 				}
