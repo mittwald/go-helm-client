@@ -200,29 +200,29 @@ func (c *HelmClient) UpdateChartRepos() error {
 
 // InstallOrUpgradeChart installs or upgrades the provided chart and returns the corresponding release.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
-func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
 	exists, err := c.chartExists(spec)
 	if err != nil {
 		return nil, err
 	}
 
 	if exists {
-		return c.upgrade(ctx, spec)
+		return c.upgrade(ctx, spec, opts)
 	}
 
-	return c.install(ctx, spec)
+	return c.install(ctx, spec, opts)
 }
 
 // InstallChart installs the provided chart and returns the corresponding release.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
-func (c *HelmClient) InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
-	return c.install(ctx, spec)
+func (c *HelmClient) InstallChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
+	return c.install(ctx, spec, opts)
 }
 
 // UpgradeChart upgrades the provided chart and returns the corresponding release.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
-func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
-	return c.upgrade(ctx, spec)
+func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
+	return c.upgrade(ctx, spec, opts)
 }
 
 // ListDeployedReleases lists all deployed releases.
@@ -265,7 +265,7 @@ func (c *HelmClient) UninstallReleaseByName(name string) error {
 
 // install installs the provided chart.
 // Optionally lints the chart if the linting flag is set.
-func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+func (c *HelmClient) install(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
 
@@ -281,8 +281,10 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.Version = ">0.0.0-0"
 	}
 
-	if spec.PostRenderer != nil {
-		client.PostRenderer = spec.PostRenderer
+	if opts != nil {
+		if opts.PostRenderer != nil {
+			client.PostRenderer = opts.PostRenderer
+		}
 	}
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
@@ -327,7 +329,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 
 // upgrade upgrades a chart and CRDs.
 // Optionally lints the chart if the linting flag is set.
-func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
 	client := action.NewUpgrade(c.ActionConfig)
 	mergeUpgradeOptions(spec, client)
 	client.Install = true
@@ -336,8 +338,10 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		client.Version = ">0.0.0-0"
 	}
 
-	if spec.PostRenderer != nil {
-		client.PostRenderer = spec.PostRenderer
+	if opts != nil {
+		if opts.PostRenderer != nil {
+			client.PostRenderer = opts.PostRenderer
+		}
 	}
 
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)

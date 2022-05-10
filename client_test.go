@@ -115,7 +115,7 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 
 	// Install a chart release.
 	// Note that helmclient.Options.Namespace should ideally match the namespace in chartSpec.Namespace.
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -130,7 +130,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useChartDirectory() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -145,7 +145,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useLocalChartArchive() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -160,7 +160,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useURL() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }

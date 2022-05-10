@@ -15,9 +15,9 @@ import (
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
-	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
-	InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
-	UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
+	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
+	InstallChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
+	UpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
 	ListDeployedReleases() ([]*release.Release, error)
 	ListReleasesByStateMask(action.ListStates) ([]*release.Release, error)
 	GetRelease(name string) (*release.Release, error)

@@ -14,14 +14,12 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Install and run mockgen
+      - name: Run go generate
         run: |
           set -x
           apt-get -y update && apt-get -y install git
-          cd /
           go install github.com/golang/mock/mockgen@v1.6.0
-          cd -
-          go env
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0 
           go generate ./...
           git diff | cat
           git status --porcelain=v1
