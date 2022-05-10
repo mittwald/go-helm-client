@@ -61,7 +61,14 @@ type HelmClient struct {
 	DebugLog     action.DebugLog
 }
 
+type GenericHelmOptions struct {
+	PostRenderer postrender.PostRenderer
+}
+
+//go:generate controller-gen object object:headerFile="./hack/boilerplate.go.txt" paths="./..." output:dir=.
+
 // ChartSpec defines the values of a helm chart
+// +kubebuilder:object:generate:=true
 type ChartSpec struct {
 	ReleaseName string `json:"release"`
 	ChartName   string `json:"chart"`
@@ -139,8 +146,4 @@ type ChartSpec struct {
 	// DryRun indicates whether to perform a dry run.
 	// +optional
 	DryRun bool `json:"dryRun,omitempty"`
-	// PostRenderer to run on the Helm Chart
-	// +kubebuilder:validation:Schemaless
-	// +optional
-	PostRenderer postrender.PostRenderer `json:"postRenderer,omitempty"`
 }

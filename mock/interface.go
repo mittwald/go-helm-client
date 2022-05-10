@@ -83,33 +83,33 @@ func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues interface{}) 
 }
 
 // InstallChart mocks base method.
-func (m *MockClient) InstallChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
+func (m *MockClient) InstallChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InstallChart", ctx, spec)
+	ret := m.ctrl.Call(m, "InstallChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InstallChart indicates an expected call of InstallChart.
-func (mr *MockClientMockRecorder) InstallChart(ctx, spec interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) InstallChart(ctx, spec, opts interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallChart", reflect.TypeOf((*MockClient)(nil).InstallChart), ctx, spec)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallChart", reflect.TypeOf((*MockClient)(nil).InstallChart), ctx, spec, opts)
 }
 
 // InstallOrUpgradeChart mocks base method.
-func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
+func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec)
+	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InstallOrUpgradeChart indicates an expected call of InstallOrUpgradeChart.
-func (mr *MockClientMockRecorder) InstallOrUpgradeChart(ctx, spec interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) InstallOrUpgradeChart(ctx, spec, opts interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallOrUpgradeChart", reflect.TypeOf((*MockClient)(nil).InstallOrUpgradeChart), ctx, spec)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallOrUpgradeChart", reflect.TypeOf((*MockClient)(nil).InstallOrUpgradeChart), ctx, spec, opts)
 }
 
 // LintChart mocks base method.
@@ -255,16 +255,16 @@ func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 }
 
 // UpgradeChart mocks base method.
-func (m *MockClient) UpgradeChart(ctx context.Context, spec *helmclient.ChartSpec) (*release.Release, error) {
+func (m *MockClient) UpgradeChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpgradeChart", ctx, spec)
+	ret := m.ctrl.Call(m, "UpgradeChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpgradeChart indicates an expected call of UpgradeChart.
-func (mr *MockClientMockRecorder) UpgradeChart(ctx, spec interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) UpgradeChart(ctx, spec, opts interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpgradeChart", reflect.TypeOf((*MockClient)(nil).UpgradeChart), ctx, spec)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpgradeChart", reflect.TypeOf((*MockClient)(nil).UpgradeChart), ctx, spec, opts)
 }
