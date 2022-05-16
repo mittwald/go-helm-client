@@ -172,17 +172,17 @@ func (mr *MockClientMockRecorder) ListReleasesByStateMask(arg0 interface{}) *gom
 }
 
 // RollbackRelease mocks base method.
-func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec, version int) error {
+func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RollbackRelease", spec, version)
+	ret := m.ctrl.Call(m, "RollbackRelease", spec)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RollbackRelease indicates an expected call of RollbackRelease.
-func (mr *MockClientMockRecorder) RollbackRelease(spec, version interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) RollbackRelease(spec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockClient)(nil).RollbackRelease), spec, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockClient)(nil).RollbackRelease), spec)
 }
 
 // SetDebugLog mocks base method.
@@ -267,4 +267,41 @@ func (m *MockClient) UpgradeChart(ctx context.Context, spec *helmclient.ChartSpe
 func (mr *MockClientMockRecorder) UpgradeChart(ctx, spec, opts interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpgradeChart", reflect.TypeOf((*MockClient)(nil).UpgradeChart), ctx, spec, opts)
+}
+
+// MockRollBack is a mock of RollBack interface.
+type MockRollBack struct {
+	ctrl     *gomock.Controller
+	recorder *MockRollBackMockRecorder
+}
+
+// MockRollBackMockRecorder is the mock recorder for MockRollBack.
+type MockRollBackMockRecorder struct {
+	mock *MockRollBack
+}
+
+// NewMockRollBack creates a new mock instance.
+func NewMockRollBack(ctrl *gomock.Controller) *MockRollBack {
+	mock := &MockRollBack{ctrl: ctrl}
+	mock.recorder = &MockRollBackMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockRollBack) EXPECT() *MockRollBackMockRecorder {
+	return m.recorder
+}
+
+// RollbackRelease mocks base method.
+func (m *MockRollBack) RollbackRelease(spec *helmclient.ChartSpec) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RollbackRelease", spec)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RollbackRelease indicates an expected call of RollbackRelease.
+func (mr *MockRollBackMockRecorder) RollbackRelease(spec interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockRollBack)(nil).RollbackRelease), spec)
 }

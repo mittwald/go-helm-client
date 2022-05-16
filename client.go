@@ -247,10 +247,9 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
-// RollbackRelease rollbacks a release to a specific version.
-// Specifying '0' as the value for 'version' will result in a rollback to the previous release version.
-func (c *HelmClient) RollbackRelease(spec *ChartSpec, version int) error {
-	return c.rollbackRelease(spec, version)
+// RollbackRelease implicity rolls back a release to the last revision.
+func (c *HelmClient) RollbackRelease(spec *ChartSpec) error {
+	return c.rollbackRelease(spec)
 }
 
 // UninstallRelease uninstalls the provided release
@@ -374,14 +373,17 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 		}
 	}
 
-	rel, err := client.RunWithContext(ctx, spec.ReleaseName, helmChart, values)
-	if err != nil {
-		return rel, err
+	upgradedRelease, upgradeErr := client.RunWithContext(ctx, spec.ReleaseName, helmChart, values)
+	if upgradeErr != nil {
+		if upgradedRelease != nil && opts.RollBack != nil {
+			return nil, opts.RollBack.RollbackRelease(spec)
+		}
+		return nil, upgradeErr
 	}
 
-	c.DebugLog("release upgraded successfully: %s/%s-%s", rel.Name, rel.Chart.Metadata.Name, rel.Chart.Metadata.Version)
+	c.DebugLog("release upgraded successfully: %s/%s-%s", upgradedRelease.Name, upgradedRelease.Chart.Metadata.Name, upgradedRelease.Chart.Metadata.Version)
 
-	return rel, nil
+	return upgradedRelease, nil
 }
 
 // uninstallRelease uninstalls the provided release.
@@ -781,14 +783,11 @@ func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 	return getReleaseClient.Run(name)
 }
 
-// rollbackRelease rolls back a release matching the ChartSpec 'spec' to a specific version.
-// Specifying version = 0 will roll back a release to the latest revision.
-func (c *HelmClient) rollbackRelease(spec *ChartSpec, version int) error {
+// rollbackRelease implicity rolls back a release to the last revision.
+func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
 	client := action.NewRollback(c.ActionConfig)
 
 	mergeRollbackOptions(spec, client)
-
-	client.Version = version
 
 	return client.Run(spec.ReleaseName)
 }
