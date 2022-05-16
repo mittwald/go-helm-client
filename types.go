@@ -38,6 +38,7 @@ type Options struct {
 	Debug            bool
 	Linting          bool
 	DebugLog         action.DebugLog
+	RegistryConfig   string
 	Output           io.Writer
 }
 
