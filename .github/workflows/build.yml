@@ -7,21 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Set up Go 1.17
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
 
       - uses: actions/checkout@v2
 
-      - name: Install and run mockgen
+      - name: Run go generate
         run: |
           set -x
           apt-get -y update && apt-get -y install git
-          cd /
-          go get -u github.com/golang/mock/mockgen@v1.6.0
-          cd -
-          go env
+          go install github.com/golang/mock/mockgen@v1.6.0
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0 
           go generate ./...
           git diff | cat
           git status --porcelain=v1
@@ -34,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.17' ]
+        go: [ '1.18' ]
 
     steps:
       - uses: actions/checkout@v2

@@ -15,13 +15,14 @@ import (
 type Client interface {
 	AddOrUpdateChartRepo(entry repo.Entry) error
 	UpdateChartRepos() error
-	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
-	InstallChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
-	UpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
+	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
+	InstallChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
+	UpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
 	ListDeployedReleases() ([]*release.Release, error)
 	ListReleasesByStateMask(action.ListStates) ([]*release.Release, error)
 	GetRelease(name string) (*release.Release, error)
-	RollbackRelease(spec *ChartSpec, version int) error
+	// RollBack is an interface to abstract a rollback action.
+	RollBack
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
 	UninstallRelease(spec *ChartSpec) error
 	UninstallReleaseByName(name string) error
@@ -29,4 +30,8 @@ type Client interface {
 	LintChart(spec *ChartSpec) error
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
+}
+
+type RollBack interface {
+	RollbackRelease(spec *ChartSpec) error
 }

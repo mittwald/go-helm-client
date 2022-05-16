@@ -1,13 +1,18 @@
 package helmclient
 
 import (
+	"bytes"
 	"context"
+
+	"helm.sh/helm/v3/pkg/action"
 
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/client-go/rest"
 )
 
 func ExampleNew() {
+	var outputBuffer bytes.Buffer
+
 	opt := &Options{
 		Namespace:        "default", // Change this to the namespace you wish the client to operate in.
 		RepositoryCache:  "/tmp/.helmcache",
@@ -15,6 +20,7 @@ func ExampleNew() {
 		Debug:            true,
 		Linting:          true,
 		DebugLog:         func(format string, v ...interface{}) {},
+		Output:           &outputBuffer, // Not mandatory, leave open for default os.Stdout
 	}
 
 	helmClient, err := New(opt)
@@ -111,7 +117,7 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 
 	// Install a chart release.
 	// Note that helmclient.Options.Namespace should ideally match the namespace in chartSpec.Namespace.
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -126,7 +132,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useChartDirectory() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -141,7 +147,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useLocalChartArchive() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
 		panic(err)
 	}
 }
@@ -156,7 +162,67 @@ func ExampleHelmClient_InstallOrUpgradeChart_useURL() {
 		Wait:        true,
 	}
 
-	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useDefaultRollBackStrategy() {
+	// Define the chart to be installed
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	// Use the default rollback strategy offer by HelmClient (revert to the previous version).
+	opts := GenericHelmOptions{
+		RollBack: helmClient,
+	}
+
+	// Install a chart release.
+	// Note that helmclient.Options.Namespace should ideally match the namespace in chartSpec.Namespace.
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, &opts); err != nil {
+		panic(err)
+	}
+}
+
+type customRollBack struct {
+	HelmClient
+}
+
+var _ RollBack = &customRollBack{}
+
+func (c customRollBack) RollbackRelease(spec *ChartSpec) error {
+	client := action.NewRollback(c.ActionConfig)
+
+	client.Force = true
+
+	return client.Run(spec.ReleaseName)
+}
+
+func ExampleHelmClient_InstallOrUpgradeChart_useCustomRollBackStrategy() {
+	// Define the chart to be installed
+	chartSpec := ChartSpec{
+		ReleaseName: "etcd-operator",
+		ChartName:   "stable/etcd-operator",
+		Namespace:   "default",
+		UpgradeCRDs: true,
+		Wait:        true,
+	}
+
+	// Use a custom rollback strategy (customRollBack needs to implement RollBack).
+	rollBacker := customRollBack{}
+
+	opts := GenericHelmOptions{
+		RollBack: rollBacker,
+	}
+
+	// Install a chart release.
+	// Note that helmclient.Options.Namespace should ideally match the namespace in chartSpec.Namespace.
+	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, &opts); err != nil {
 		panic(err)
 	}
 }
@@ -259,8 +325,8 @@ func ExampleHelmClient_RollbackRelease() {
 		Wait:        true,
 	}
 
-	// Rollback to the previous version of the release by setting the release version to '0'.
-	if err := helmClient.RollbackRelease(&chartSpec, 0); err != nil {
+	// Rollback to the previous version of the release.
+	if err := helmClient.RollbackRelease(&chartSpec); err != nil {
 		return
 	}
 }
