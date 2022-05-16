@@ -247,7 +247,7 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
-// RollbackRelease implicity rolls back a release to the last revision.
+// RollbackRelease implicitly rolls back a release to the last revision.
 func (c *HelmClient) RollbackRelease(spec *ChartSpec) error {
 	return c.rollbackRelease(spec)
 }
@@ -783,7 +783,7 @@ func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 	return getReleaseClient.Run(name)
 }
 
-// rollbackRelease implicity rolls back a release to the last revision.
+// rollbackRelease implicitly rolls back a release to the last revision.
 func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
 	client := action.NewRollback(c.ActionConfig)
 
