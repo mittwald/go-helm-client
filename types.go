@@ -63,6 +63,7 @@ type HelmClient struct {
 
 type GenericHelmOptions struct {
 	PostRenderer postrender.PostRenderer
+	RollBack     RollBack
 }
 
 //go:generate controller-gen object object:headerFile="./hack/boilerplate.go.txt" paths="./..." output:dir=.
