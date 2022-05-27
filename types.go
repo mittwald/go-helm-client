@@ -42,11 +42,33 @@ type Options struct {
 	Output           io.Writer
 }
 
+// RESTClientGetter defines the options to customsize the RESTClient when
+// call  created
+type RESTClientOption func(*rest.Config)
+
+// The maximum length of time to wait before giving up on a server request
+// the created RESTClient will use DefaultTimeout: 32s
+func Timeout(d time.Duration) RESTClientOption {
+	return func(r *rest.Config) {
+		r.Timeout = d
+	}
+}
+
+// Maximum burst for throttle
+// the created RESTClient will use DefaultBurst: 100.
+func Burst(v int) RESTClientOption {
+	return func(r *rest.Config) {
+		r.Burst = v
+	}
+}
+
 // RESTClientGetter defines the values of a helm REST client.
 type RESTClientGetter struct {
 	namespace  string
 	kubeConfig []byte
 	restConfig *rest.Config
+
+	opts []RESTClientOption
 }
 
 // HelmClient Client defines the values of a helm client.

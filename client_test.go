@@ -68,7 +68,7 @@ func ExampleNewClientFromKubeConf() {
 		KubeConfig:  []byte{},
 	}
 
-	helmClient, err := NewClientFromKubeConf(opt)
+	helmClient, err := NewClientFromKubeConf(opt, Burst(100), Timeout(10e9))
 	if err != nil {
 		panic(err)
 	}
