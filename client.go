@@ -107,7 +107,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 	registryClient, err := registry.NewClient(
 		registry.ClientOptDebug(settings.Debug),
 		registry.ClientOptCredentialsFile(settings.RegistryConfig),
-        )
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -389,7 +389,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 
 	upgradedRelease, upgradeErr := client.RunWithContext(ctx, spec.ReleaseName, helmChart, values)
 	if upgradeErr != nil {
-		if upgradedRelease != nil && opts.RollBack != nil {
+		if upgradedRelease != nil && opts != nil && opts.RollBack != nil {
 			return nil, opts.RollBack.RollbackRelease(spec)
 		}
 		return nil, upgradeErr
