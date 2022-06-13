@@ -126,7 +126,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 
 // setEnvSettings sets the client's environment settings based on the provided client configuration.
 func setEnvSettings(ppOptions **Options, settings *cli.EnvSettings) error {
-	if ppOptions == nil {
+	if *ppOptions == nil {
 		*ppOptions = &Options{
 			RepositoryConfig: defaultRepositoryConfigPath,
 			RepositoryCache:  defaultCachePath,
