@@ -11,6 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	helmclient "github.com/mittwald/go-helm-client"
 	action "helm.sh/helm/v3/pkg/action"
+	chart "helm.sh/helm/v3/pkg/chart"
 	release "helm.sh/helm/v3/pkg/release"
 	repo "helm.sh/helm/v3/pkg/repo"
 )
@@ -50,6 +51,22 @@ func (m *MockClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 func (mr *MockClientMockRecorder) AddOrUpdateChartRepo(entry interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrUpdateChartRepo", reflect.TypeOf((*MockClient)(nil).AddOrUpdateChartRepo), entry)
+}
+
+// GetChart mocks base method.
+func (m *MockClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChart", chartName, chartPathOptions)
+	ret0, _ := ret[0].(*chart.Chart)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetChart indicates an expected call of GetChart.
+func (mr *MockClientMockRecorder) GetChart(chartName, chartPathOptions interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChart", reflect.TypeOf((*MockClient)(nil).GetChart), chartName, chartPathOptions)
 }
 
 // GetRelease mocks base method.

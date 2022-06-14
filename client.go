@@ -300,7 +300,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec, opts *Generic
 		}
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.GetChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +357,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 		}
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.GetChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -471,7 +471,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 		client.Version = ">0.0.0-0"
 	}
 
-	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	helmChart, chartPath, err := c.GetChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -518,7 +518,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 
 // LintChart fetches a chart using the provided ChartSpec 'spec' and lints it's values.
 func (c *HelmClient) LintChart(spec *ChartSpec) error {
-	_, chartPath, err := c.getChart(spec.ChartName, &action.ChartPathOptions{
+	_, chartPath, err := c.GetChart(spec.ChartName, &action.ChartPathOptions{
 		Version: spec.Version,
 	})
 	if err != nil {
@@ -735,8 +735,8 @@ func (c *HelmClient) upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, 
 	return nil
 }
 
-// getChart returns a chart matching the provided chart name and options.
-func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+// GetChart returns a chart matching the provided chart name and options.
+func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
 	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
 	if err != nil {
 		return nil, "", err
@@ -824,7 +824,7 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 					return nil, err
 				}
 
-				helmChart, _, err = c.getChart(spec.ChartName, chartPathOptions)
+				helmChart, _, err = c.GetChart(spec.ChartName, chartPathOptions)
 				if err != nil {
 					return nil, err
 				}
