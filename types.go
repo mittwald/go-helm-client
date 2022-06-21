@@ -83,6 +83,11 @@ type ChartSpec struct {
 	// and https://github.com/kubernetes-sigs/controller-tools/pull/317
 	// +optional
 	ValuesYaml string `json:"valuesYaml,omitempty"`
+
+	// SaveRawValues save the user defined values or not
+	// +optional
+	SaveRawValues bool `json:"saveRawValues,omitempty"`
+
 	// Version of the chart release.
 	// +optional
 	Version string `json:"version,omitempty"`
