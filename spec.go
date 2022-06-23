@@ -4,8 +4,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// RawValuesKey represents the key for save raw values
-const RawValuesKey = "raw_values"
+// TransparentKey represents the key for save transparent values
+const TransparentKey = "transparent--go-helm-client"
 
 // GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
@@ -16,8 +16,8 @@ func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	if spec.SaveRawValues {
-		values[RawValuesKey] = spec.ValuesYaml
+	if spec.Transparent != "" {
+		values[TransparentKey] = spec.Transparent
 	}
 
 	return values, nil
