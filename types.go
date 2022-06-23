@@ -84,7 +84,7 @@ type ChartSpec struct {
 	// +optional
 	ValuesYaml string `json:"valuesYaml,omitempty"`
 
-	// Transparent the user defined transparent values, will retrieve infuture
+	// Transparent the user defined transparent values, will retrieve in future
 	// +optional
 	Transparent string `json:"transparent,omitempty"`
 

@@ -5,7 +5,7 @@ import (
 )
 
 // transparentKey represents the key for save transparent values
-const transparentKey = "transparent--go-helm-client"
+const transparentKey = "transparent__go-helm-client"
 
 // GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
