@@ -897,3 +897,15 @@ func mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions 
 	uninstallReleaseOptions.DisableHooks = chartSpec.DisableHooks
 	uninstallReleaseOptions.Timeout = chartSpec.Timeout
 }
+
+// Transparent returns the transparent in the release, if not existed, returns ""
+func Transparent(r *release.Release) string {
+	if r == nil {
+		return ""
+	}
+	if v, ok := r.Config[transparentKey]; !ok {
+		return ""
+	} else {
+		return v.(string)
+	}
+}

@@ -4,8 +4,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// TransparentKey represents the key for save transparent values
-const TransparentKey = "transparent--go-helm-client"
+// transparentKey represents the key for save transparent values
+const transparentKey = "transparent--go-helm-client"
 
 // GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
@@ -17,7 +17,7 @@ func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 	}
 
 	if spec.Transparent != "" {
-		values[TransparentKey] = spec.Transparent
+		values[transparentKey] = spec.Transparent
 	}
 
 	return values, nil
