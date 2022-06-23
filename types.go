@@ -84,9 +84,9 @@ type ChartSpec struct {
 	// +optional
 	ValuesYaml string `json:"valuesYaml,omitempty"`
 
-	// SaveRawValues save the user defined values or not
+	// Transparent the user defined transparent values, will retrieve in future
 	// +optional
-	SaveRawValues bool `json:"saveRawValues,omitempty"`
+	Transparent string `json:"transparent,omitempty"`
 
 	// Version of the chart release.
 	// +optional
