@@ -35,9 +35,11 @@ type Client interface {
 
 	// Transparent returns the transparent in the release, if not existed, returns ""
 	Transparent(name string) string
+
+	// TransparentWithRelease returns the transparent value bind to the release if not existed, returns ""
+	TransparentWithRelease(rel *release.Release) string
 }
 
 type RollBack interface {
 	RollbackRelease(spec *ChartSpec) error
 }
-
