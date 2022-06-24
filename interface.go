@@ -32,8 +32,12 @@ type Client interface {
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
 	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
+
+	// Transparent returns the transparent in the release, if not existed, returns ""
+	Transparent(name string) string
 }
 
 type RollBack interface {
 	RollbackRelease(spec *ChartSpec) error
 }
+

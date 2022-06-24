@@ -229,6 +229,20 @@ func (mr *MockClientMockRecorder) TemplateChart(spec interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TemplateChart", reflect.TypeOf((*MockClient)(nil).TemplateChart), spec)
 }
 
+// Transparent mocks base method.
+func (m *MockClient) Transparent(name string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transparent", name)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Transparent indicates an expected call of Transparent.
+func (mr *MockClientMockRecorder) Transparent(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transparent", reflect.TypeOf((*MockClient)(nil).Transparent), name)
+}
+
 // UninstallRelease mocks base method.
 func (m *MockClient) UninstallRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()

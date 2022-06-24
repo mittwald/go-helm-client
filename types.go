@@ -4,14 +4,12 @@ import (
 	"io"
 	"time"
 
-	"helm.sh/helm/v3/pkg/postrender"
-
-	"helm.sh/helm/v3/pkg/getter"
-	"k8s.io/client-go/rest"
-
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/postrender"
 	"helm.sh/helm/v3/pkg/repo"
+	"k8s.io/client-go/rest"
 )
 
 // Type Guard asserting that HelmClient satisfies the HelmClient interface.
