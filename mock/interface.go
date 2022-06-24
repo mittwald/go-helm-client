@@ -243,6 +243,20 @@ func (mr *MockClientMockRecorder) Transparent(name interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transparent", reflect.TypeOf((*MockClient)(nil).Transparent), name)
 }
 
+// TransparentWithRelease mocks base method.
+func (m *MockClient) TransparentWithRelease(rel *release.Release) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransparentWithRelease", rel)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// TransparentWithRelease indicates an expected call of TransparentWithRelease.
+func (mr *MockClientMockRecorder) TransparentWithRelease(rel interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransparentWithRelease", reflect.TypeOf((*MockClient)(nil).TransparentWithRelease), rel)
+}
+
 // UninstallRelease mocks base method.
 func (m *MockClient) UninstallRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()

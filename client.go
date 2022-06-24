@@ -269,8 +269,12 @@ func (c *HelmClient) Transparent(releaseName string) string {
 	if err != nil {
 		return ""
 	}
+	return c.TransparentWithRelease(r)
+}
 
-	if v, ok := r.Config[transparentKey]; !ok {
+// TransparentWithRelease returns the transparent value bind to the release if not existed, returns ""
+func (c *HelmClient) TransparentWithRelease(rel *release.Release) string {
+	if v, ok := rel.Config[transparentKey]; !ok {
 		return ""
 	} else {
 		return v.(string)
