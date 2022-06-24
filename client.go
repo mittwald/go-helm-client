@@ -263,6 +263,20 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
+// Transparent returns the transparent value if not existed, returns ""
+func (c *HelmClient) Transparent(releaseName string) string {
+	r, err := c.getRelease(releaseName)
+	if err != nil {
+		return ""
+	}
+
+	if v, ok := r.Config[transparentKey]; !ok {
+		return ""
+	} else {
+		return v.(string)
+	}
+}
+
 // RollbackRelease implicitly rolls back a release to the last revision.
 func (c *HelmClient) RollbackRelease(spec *ChartSpec) error {
 	return c.rollbackRelease(spec)
@@ -896,16 +910,4 @@ func mergeUpgradeOptions(chartSpec *ChartSpec, upgradeOptions *action.Upgrade) {
 func mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *action.Uninstall) {
 	uninstallReleaseOptions.DisableHooks = chartSpec.DisableHooks
 	uninstallReleaseOptions.Timeout = chartSpec.Timeout
-}
-
-// Transparent returns the transparent in the release, if not existed, returns ""
-func Transparent(r *release.Release) string {
-	if r == nil {
-		return ""
-	}
-	if v, ok := r.Config[transparentKey]; !ok {
-		return ""
-	} else {
-		return v.(string)
-	}
 }
