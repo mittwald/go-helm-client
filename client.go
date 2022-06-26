@@ -244,13 +244,37 @@ func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec, opts *Ge
 // ListDeployedReleases lists all deployed releases.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
-	return c.listReleases(action.ListDeployed)
+	opts := ListOptions{
+		States: action.ListDeployed,
+	}
+	return c.listReleases(opts)
 }
 
 // ListReleasesByStateMask lists all releases filtered by stateMask.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListReleasesByStateMask(states action.ListStates) ([]*release.Release, error) {
-	return c.listReleases(states)
+	opts := ListOptions{
+		States: states,
+	}
+	return c.listReleases(opts)
+}
+
+// ListReleases lists all releases with options
+func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) {
+	rels, err := c.listReleases(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var rr []*release.Release
+
+	for _, v := range rels {
+		if _, ok := v.Config[walkAroundCustomLabelKey]; !ok {
+			continue
+		}
+		rr = append(rr, v)
+	}
+	return rr, nil
 }
 
 // GetReleaseValues returns the (optionally, all computed) values for the specified release.
@@ -778,7 +802,10 @@ func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPa
 // in a namespace or not based on the provided chart spec.
 // Note that this function only considers the contained chart name and namespace.
 func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
-	releases, err := c.listReleases(action.ListAll)
+	opts := ListOptions{
+		States: action.ListAll,
+	}
+	releases, err := c.listReleases(opts)
 	if err != nil {
 		return false, err
 	}
@@ -793,9 +820,11 @@ func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
 }
 
 // listReleases lists all releases that match the given state.
-func (c *HelmClient) listReleases(state action.ListStates) ([]*release.Release, error) {
+func (c *HelmClient) listReleases(opts ListOptions) ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
-	listClient.StateMask = state
+	listClient.StateMask = opts.States
+	listClient.Selector = opts.Selector
+	//TODO: more options
 
 	return listClient.Run()
 }

@@ -21,6 +21,7 @@ type Client interface {
 	UpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error)
 	ListDeployedReleases() ([]*release.Release, error)
 	ListReleasesByStateMask(action.ListStates) ([]*release.Release, error)
+	ListReleases(opts ListOptions) ([]*release.Release, error)
 	GetRelease(name string) (*release.Release, error)
 	// RollBack is an interface to abstract a rollback action.
 	RollBack
