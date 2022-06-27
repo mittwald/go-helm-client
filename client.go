@@ -269,7 +269,12 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 	var rr []*release.Release
 
 	for _, v := range rels {
-		if _, ok := v.Config[walkAroundCustomLabelKey]; !ok {
+		t, ok := v.Config[walkAroundCustomTagKey]
+		if !ok {
+			continue
+		}
+		tag := strings.TrimSpace(t.(string))
+		if tag != opts.Selector {
 			continue
 		}
 		rr = append(rr, v)

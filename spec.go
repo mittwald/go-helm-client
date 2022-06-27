@@ -7,9 +7,8 @@ import (
 // transparentKey represents the key for save transparent values
 const transparentKey = "transparent__go-helm-client"
 
-// walkAroundCustomLabelKey walkaround & wait for https://github.com/helm/helm/issues/11049
-const walkAroundCustomLabelKey = "walk-around-custom-label__go-helm-client"
-const walkAroundCustomLabelValue = "ok"
+// walkAroundCustomTagKey walkaround & wait for https://github.com/helm/helm/issues/11049
+const walkAroundCustomTagKey = "walk-around-custom-tag__go-helm-client"
 
 // GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
@@ -23,7 +22,9 @@ func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 	if spec.Transparent != "" {
 		values[transparentKey] = spec.Transparent
 	}
-	values[walkAroundCustomLabelKey] = walkAroundCustomLabelValue
+	if spec.Tag != "" {
+		values[walkAroundCustomTagKey] = spec.Tag
+	}
 
 	return values, nil
 }
