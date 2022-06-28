@@ -268,7 +268,17 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 
 	var rr []*release.Release
 
+	filterByName := false
+	filter := ""
+	if opts.Filter != "" {
+		filterByName = true
+		filter = strings.ToLower(opts.Filter)
+	}
 	for _, v := range rels {
+		if filterByName && !strings.Contains(strings.ToLower(v.Name), filter) {
+			continue
+		}
+
 		t, ok := v.Config[walkAroundCustomTagKey]
 		if !ok {
 			continue

@@ -8,5 +8,10 @@ import (
 type ListOptions struct {
 	Namespace string
 	States    action.ListStates
-	Selector  string
+
+	// label.Selector
+	Selector string
+
+	// name filter  case-insensitive
+	Filter string
 }
