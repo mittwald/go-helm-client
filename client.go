@@ -828,7 +828,10 @@ func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
 func (c *HelmClient) listReleases(opts ListOptions) ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
 	listClient.StateMask = opts.States
-	listClient.Selector = opts.Selector
+
+	// wait for https://github.com/helm/helm/pull/10533
+	//listClient.Selector = opts.Selector
+
 	//TODO: more options
 
 	return listClient.Run()

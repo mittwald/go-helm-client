@@ -86,7 +86,7 @@ type ChartSpec struct {
 	// +optional
 	Transparent string `json:"transparent,omitempty"`
 
-	// Tag the tempoary walkaround & wait for https://github.com/helm/helm/issues/11049
+	// Tag the tempoary walkaround & wait for https://github.com/helm/helm/pull/10533
 	// +optional
 	Tag string `json:"tag,omitempty"`
 
