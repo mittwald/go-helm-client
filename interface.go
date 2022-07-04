@@ -34,11 +34,8 @@ type Client interface {
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
 	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
 
-	// Transparent returns the transparent in the release, if not existed, returns ""
-	Transparent(name string) string
-
-	// TransparentWithRelease returns the transparent value bind to the release if not existed, returns ""
-	TransparentWithRelease(rel *release.Release) string
+	// AnnotationWithRelease returns the annotation value bind to the key in the release if not existed, returns ""
+	AnnotationWithRelease(rel *release.Release, key string) string
 }
 
 type RollBack interface {

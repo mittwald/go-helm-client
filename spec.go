@@ -4,11 +4,16 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// transparentKey represents the key for save transparent values
-const transparentKey = "transparent__go-helm-client"
+const fmtAnnoationKey = "g0-he1m-c1ient__%s"
 
-// walkAroundCustomTagKey walkaround & wait for https://github.com/helm/helm/issues/11049
-const walkAroundCustomTagKey = "walk-around-custom-tag__go-helm-client"
+// common annoation's key
+const (
+	// walkaround & wait for https://github.com/helm/helm/issues/11049
+	ManagedBy = "manged-by"
+
+	// the user defined transparent values, will retrieve in future
+	Transparent = "transparent"
+)
 
 // GetValuesMap returns the mapped out values of a chart
 func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
@@ -19,11 +24,8 @@ func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	if spec.Transparent != "" {
-		values[transparentKey] = spec.Transparent
-	}
-	if spec.Tag != "" {
-		values[walkAroundCustomTagKey] = spec.Tag
+	for k, v := range spec.Annotations {
+		values[toAnnotationKey(k)] = v
 	}
 
 	return values, nil

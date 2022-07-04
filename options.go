@@ -9,8 +9,8 @@ type ListOptions struct {
 	Namespace string
 	States    action.ListStates
 
-	// label.Selector
-	Selector string
+	//label.Selector
+	Selectors map[string]string
 
 	// name filter  case-insensitive
 	Filter string

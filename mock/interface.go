@@ -53,6 +53,20 @@ func (mr *MockClientMockRecorder) AddOrUpdateChartRepo(entry interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrUpdateChartRepo", reflect.TypeOf((*MockClient)(nil).AddOrUpdateChartRepo), entry)
 }
 
+// AnnotationWithRelease mocks base method.
+func (m *MockClient) AnnotationWithRelease(rel *release.Release, key string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AnnotationWithRelease", rel, key)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// AnnotationWithRelease indicates an expected call of AnnotationWithRelease.
+func (mr *MockClientMockRecorder) AnnotationWithRelease(rel, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnnotationWithRelease", reflect.TypeOf((*MockClient)(nil).AnnotationWithRelease), rel, key)
+}
+
 // GetChart mocks base method.
 func (m *MockClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
 	m.ctrl.T.Helper()
@@ -242,34 +256,6 @@ func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
 func (mr *MockClientMockRecorder) TemplateChart(spec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TemplateChart", reflect.TypeOf((*MockClient)(nil).TemplateChart), spec)
-}
-
-// Transparent mocks base method.
-func (m *MockClient) Transparent(name string) string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transparent", name)
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Transparent indicates an expected call of Transparent.
-func (mr *MockClientMockRecorder) Transparent(name interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transparent", reflect.TypeOf((*MockClient)(nil).Transparent), name)
-}
-
-// TransparentWithRelease mocks base method.
-func (m *MockClient) TransparentWithRelease(rel *release.Release) string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TransparentWithRelease", rel)
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// TransparentWithRelease indicates an expected call of TransparentWithRelease.
-func (mr *MockClientMockRecorder) TransparentWithRelease(rel interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransparentWithRelease", reflect.TypeOf((*MockClient)(nil).TransparentWithRelease), rel)
 }
 
 // UninstallRelease mocks base method.

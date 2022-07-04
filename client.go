@@ -10,8 +10,6 @@ import (
 	"reflect"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -25,6 +23,7 @@ import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -274,20 +273,25 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 		filterByName = true
 		filter = strings.ToLower(opts.Filter)
 	}
-	for _, v := range rels {
-		if filterByName && !strings.Contains(strings.ToLower(v.Name), filter) {
+
+	// TODO: go routine it ?
+	for _, rel := range rels {
+		if filterByName && !strings.Contains(strings.ToLower(rel.Name), filter) {
 			continue
 		}
 
-		t, ok := v.Config[walkAroundCustomTagKey]
-		if !ok {
-			continue
+		for key, val := range opts.Selectors {
+			sel, ok := rel.Config[key]
+			if !ok {
+				continue
+			}
+
+			if strings.TrimSpace(sel.(string)) != val {
+				continue
+			}
 		}
-		tag := strings.TrimSpace(t.(string))
-		if tag != opts.Selector {
-			continue
-		}
-		rr = append(rr, v)
+
+		rr = append(rr, rel)
 	}
 	return rr, nil
 }
@@ -302,22 +306,26 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
-// Transparent returns the transparent value if not existed, returns ""
-func (c *HelmClient) Transparent(releaseName string) string {
-	r, err := c.getRelease(releaseName)
-	if err != nil {
-		return ""
-	}
-	return c.TransparentWithRelease(r)
+func toAnnotationKey(origin string) string {
+	return fmt.Sprintf(fmtAnnoationKey, origin)
 }
 
-// TransparentWithRelease returns the transparent value bind to the release if not existed, returns ""
-func (c *HelmClient) TransparentWithRelease(rel *release.Release) string {
-	if v, ok := rel.Config[transparentKey]; !ok {
+// AnnotationWithRelease get the annoation from release by key
+func (c *HelmClient) AnnotationWithRelease(rel *release.Release, key string) string {
+	if v, ok := rel.Config[toAnnotationKey(key)]; !ok {
 		return ""
 	} else {
 		return v.(string)
 	}
+}
+
+// Annotation  get the Annotation with the key from the release
+func (c *HelmClient) Annotation(releaseName, key string) string {
+	r, err := c.getRelease(releaseName)
+	if err != nil {
+		return ""
+	}
+	return c.AnnotationWithRelease(r, key)
 }
 
 // RollbackRelease implicitly rolls back a release to the last revision.

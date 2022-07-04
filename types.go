@@ -82,13 +82,9 @@ type ChartSpec struct {
 	// +optional
 	ValuesYaml string `json:"valuesYaml,omitempty"`
 
-	// Transparent the user defined transparent values, will retrieve in future
+	// Annotations save the all user defined data
 	// +optional
-	Transparent string `json:"transparent,omitempty"`
-
-	// Tag the tempoary walkaround & wait for https://github.com/helm/helm/pull/10533
-	// +optional
-	Tag string `json:"tag,omitempty"`
+	Annotations map[string]string
 
 	// Version of the chart release.
 	// +optional
