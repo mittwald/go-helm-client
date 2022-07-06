@@ -35,7 +35,7 @@ type Client interface {
 	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
 
 	// AnnotationWithRelease returns the annotation value bind to the key in the release if not existed, returns ""
-	AnnotationWithRelease(rel *release.Release, key string) string
+	AnnotationWithRelease(rel *release.Release, key string) interface{}
 }
 
 type RollBack interface {

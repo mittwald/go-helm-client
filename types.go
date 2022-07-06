@@ -84,7 +84,7 @@ type ChartSpec struct {
 
 	// Annotations save the all user defined data
 	// +optional
-	Annotations map[string]string
+	Annotations map[string]interface{}
 
 	// Version of the chart release.
 	// +optional
