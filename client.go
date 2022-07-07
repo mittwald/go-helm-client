@@ -312,11 +312,7 @@ func toAnnotationKey(origin string) string {
 
 // AnnotationWithRelease get the annoation from release by key
 func (c *HelmClient) AnnotationWithRelease(rel *release.Release, key string) interface{} {
-	if v, ok := rel.Config[toAnnotationKey(key)]; !ok {
-		return ""
-	} else {
-		return v.(string)
-	}
+	return rel.Config[toAnnotationKey(key)]
 }
 
 // Annotation  get the Annotation with the key from the release
