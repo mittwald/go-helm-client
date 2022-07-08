@@ -274,6 +274,7 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 		filter = strings.ToLower(opts.Filter)
 	}
 
+releaseLoop:
 	// TODO: go routine it ?
 	for _, rel := range rels {
 		if filterByName && !strings.Contains(strings.ToLower(rel.Name), filter) {
@@ -283,11 +284,11 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 		for key, val := range opts.Selectors {
 			sel, ok := rel.Config[key]
 			if !ok {
-				continue
+				continue releaseLoop
 			}
 
 			if strings.TrimSpace(sel.(string)) != val {
-				continue
+				continue releaseLoop
 			}
 		}
 
