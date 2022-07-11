@@ -282,7 +282,7 @@ releaseLoop:
 		}
 
 		for key, val := range opts.Selectors {
-			sel, ok := rel.Config[key]
+			sel, ok := rel.Config[toAnnotationKey(key)]
 			if !ok {
 				continue releaseLoop
 			}
