@@ -49,14 +49,14 @@ func New(options *Options) (Client, error) {
 	return newClient(options, settings.RESTClientGetter(), settings)
 }
 
-// NewClientFromKubeConf returns a new Helm client constructed with the provided kubeconfig options.
-func NewClientFromKubeConf(options *KubeConfClientOptions) (Client, error) {
+// NewClientFromKubeConf returns a new Helm client constructed with the provided kubeconfig & RESTClient (optional) options.
+func NewClientFromKubeConf(options *KubeConfClientOptions, restClientOpts ...RESTClientOption) (Client, error) {
 	settings := cli.New()
 	if options.KubeConfig == nil {
 		return nil, fmt.Errorf("kubeconfig missing")
 	}
 
-	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil)
+	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil, restClientOpts...)
 
 	if options.KubeContext != "" {
 		settings.KubeContext = options.KubeContext
