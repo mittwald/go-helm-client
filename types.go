@@ -45,8 +45,10 @@ type Options struct {
 // RESTClientOption is a function that can be used to set the RESTClientOptions of a HelmClient.
 type RESTClientOption func(*rest.Config)
 
-// The maximum length of time to wait before giving up on a server request
-// the created RESTClient will use DefaultTimeout: 32s
+// Timeout specifies the timeout for a RESTClient as a RESTClientOption.
+// The default (if unspecified) is 32 seconds.
+// See [1] for reference.
+// [^1]: https://github.com/kubernetes/client-go/blob/c6bd30b9ec5f668df191bc268c6f550c37726edb/discovery/discovery_client.go#L52
 func Timeout(d time.Duration) RESTClientOption {
 	return func(r *rest.Config) {
 		r.Timeout = d
