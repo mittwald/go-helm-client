@@ -42,8 +42,7 @@ type Options struct {
 	Output           io.Writer
 }
 
-// RESTClientGetter defines the options to customsize the RESTClient when
-// call  created
+// RESTClientOption is a function that can be used to set the RESTClientOptions of a HelmClient.
 type RESTClientOption func(*rest.Config)
 
 // The maximum length of time to wait before giving up on a server request
