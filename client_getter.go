@@ -12,11 +12,12 @@ import (
 // NewRESTClientGetter returns a RESTClientGetter using the provided 'namespace', 'kubeConfig' and 'restConfig'.
 //
 // source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
-func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config) *RESTClientGetter {
+func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config, opts ...RESTClientOption) *RESTClientGetter {
 	return &RESTClientGetter{
 		namespace:  namespace,
 		kubeConfig: kubeConfig,
 		restConfig: restConfig,
+		opts:       opts,
 	}
 }
 
@@ -27,6 +28,7 @@ func (c *RESTClientGetter) ToRESTConfig() (*rest.Config, error) {
 	}
 
 	return clientcmd.RESTConfigFromKubeConfig(c.kubeConfig)
+
 }
 
 // ToDiscoveryClient returns a CachedDiscoveryInterface that can be used as a discovery client.
@@ -40,6 +42,10 @@ func (c *RESTClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterfa
 	// Given 25 API groups with about one version each, discovery needs to make 50 requests.
 	// This setting is only used for discovery.
 	config.Burst = 100
+
+	for _, fn := range c.opts {
+		fn(config)
+	}
 
 	discoveryClient, _ := discovery.NewDiscoveryClientForConfig(config)
 	return memory.NewMemCacheClient(discoveryClient), nil
