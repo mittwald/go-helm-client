@@ -258,6 +258,9 @@ func (c *HelmClient) ListReleasesByStateMask(states action.ListStates) ([]*relea
 	return c.listReleases(opts)
 }
 
+// GatewayNameKey represents the gateway's name, is not same as helm release name.
+const gatewayNameKey = "gateway-name"
+
 // ListReleases lists all releases with options
 func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) {
 	rels, err := c.listReleases(opts)
@@ -277,8 +280,17 @@ func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) 
 releaseLoop:
 	// TODO: go routine it ?
 	for _, rel := range rels {
-		if filterByName && !strings.Contains(strings.ToLower(rel.Name), filter) {
-			continue
+
+		if filterByName {
+			obj, ok := rel.Config[toAnnotationKey(gatewayNameKey)]
+			if !ok {
+				continue
+			}
+
+			if !strings.Contains(strings.ToLower(obj.(string)), filter) {
+				continue
+			}
+
 		}
 
 		for key, val := range opts.Selectors {
