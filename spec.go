@@ -15,6 +15,10 @@ func (spec *ChartSpec) GetValuesMap() (map[string]interface{}, error) {
 		return nil, err
 	}
 
+	if values == nil {
+		values = map[string]interface{}{}
+	}
+
 	for k, v := range spec.Annotations {
 		values[toAnnotationKey(k)] = v
 	}
