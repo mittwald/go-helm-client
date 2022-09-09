@@ -294,7 +294,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 
 	// User specified a value via --set-string
 	for _, value := range spec.Sets {
-		if err := strvals.ParseIntoString(value, values); err != nil {
+		if err := strvals.ParseInto(value, values); err != nil {
 			return nil, errors.New("failed parsing --set-string data")
 		}
 	}
@@ -348,7 +348,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 
 	// User specified a value via --set-string
 	for _, value := range spec.Sets {
-		if err := strvals.ParseIntoString(value, values); err != nil {
+		if err := strvals.ParseInto(value, values); err != nil {
 			return nil, errors.New("failed parsing --set-string data")
 		}
 	}
