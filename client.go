@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -295,7 +294,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 	// User specified a value via --set-string
 	for _, value := range spec.Sets {
 		if err := strvals.ParseInto(value, values); err != nil {
-			return nil, errors.New("failed parsing --set-string data")
+			return nil, fmt.Errorf("failed parsing --set-string data error:%v", err)
 		}
 	}
 
