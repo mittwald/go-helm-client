@@ -291,6 +291,9 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
+	if values == nil {
+		values = make(map[string]interface{})
+	}
 	// User specified a value via --set-string
 	for _, value := range spec.Sets {
 		if err := strvals.ParseInto(value, values); err != nil {
