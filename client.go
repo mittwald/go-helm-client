@@ -292,7 +292,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 	}
 
 	if values == nil {
-		values = make(map[string]interface{})
+		values = helmChart.Values
 	}
 	// User specified a value via --set-string
 	for _, value := range spec.Sets {
