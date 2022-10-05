@@ -90,7 +90,7 @@ type GenericHelmOptions struct {
 	RollBack     RollBack
 }
 
-//go:generate controller-gen object object:headerFile="./hack/boilerplate.go.txt" paths="./..." output:dir=.
+//go:generate controller-gen object paths="./..." output:dir=.
 
 // ChartSpec defines the values of a helm chart
 // +kubebuilder:object:generate:=true
