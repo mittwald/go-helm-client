@@ -27,7 +27,7 @@ type Client interface {
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
 	UninstallRelease(spec *ChartSpec) error
 	UninstallReleaseByName(name string) error
-	TemplateChart(spec *ChartSpec) ([]byte, error)
+	TemplateChart(spec *ChartSpec, options *HelmTemplateOptions) ([]byte, error)
 	LintChart(spec *ChartSpec) error
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)

@@ -215,18 +215,18 @@ func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call
 }
 
 // TemplateChart mocks base method.
-func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec) ([]byte, error) {
+func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec, options helmclient.HelmTemplateOptions) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TemplateChart", spec)
+	ret := m.ctrl.Call(m, "TemplateChart", spec, options)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // TemplateChart indicates an expected call of TemplateChart.
-func (mr *MockClientMockRecorder) TemplateChart(spec interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) TemplateChart(spec, options interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TemplateChart", reflect.TypeOf((*MockClient)(nil).TemplateChart), spec)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TemplateChart", reflect.TypeOf((*MockClient)(nil).TemplateChart), spec, options)
 }
 
 // UninstallRelease mocks base method.
