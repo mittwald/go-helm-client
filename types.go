@@ -135,5 +135,6 @@ type ChartSpec struct {
 	// +optional
 	PostRenderer postrender.PostRenderer `json:"postRenderer,omitempty"`
 	Sets         []string                `json:"sets,omitempty"`
+	StrSets      []string                `json:"str_sets,omitempty"`
 	LocalPath    string                  `json:"localPath,omitempty"`
 }

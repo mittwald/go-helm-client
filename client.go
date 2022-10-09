@@ -294,9 +294,15 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 	if values == nil {
 		values = helmChart.Values
 	}
-	// User specified a value via --set-string
+
 	for _, value := range spec.Sets {
 		if err := strvals.ParseInto(value, values); err != nil {
+			return nil, fmt.Errorf("failed parsing --set data error:%v", err)
+		}
+	}
+	// User specified a value via --set-string
+	for _, value := range spec.StrSets {
+		if err := strvals.ParseIntoString(value, values); err != nil {
 			return nil, fmt.Errorf("failed parsing --set-string data error:%v", err)
 		}
 	}
@@ -348,9 +354,19 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) (*release.Rel
 		return nil, err
 	}
 
-	// User specified a value via --set-string
+	if values == nil {
+		values = helmChart.Values
+	}
+
 	for _, value := range spec.Sets {
 		if err := strvals.ParseInto(value, values); err != nil {
+			return nil, fmt.Errorf("failed parsing --set data error:%v", err)
+		}
+	}
+
+	// User specified a value via --set-string
+	for _, value := range spec.StrSets {
+		if err := strvals.ParseIntoString(value, values); err != nil {
 			return nil, fmt.Errorf("failed parsing --set-string data error:%v", err)
 		}
 	}
