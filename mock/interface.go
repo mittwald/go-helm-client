@@ -215,7 +215,7 @@ func (mr *MockClientMockRecorder) SetDebugLog(debugLog interface{}) *gomock.Call
 }
 
 // TemplateChart mocks base method.
-func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec, options helmclient.HelmTemplateOptions) ([]byte, error) {
+func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec, options *helmclient.HelmTemplateOptions) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TemplateChart", spec, options)
 	ret0, _ := ret[0].([]byte)
