@@ -450,7 +450,7 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 }
 
 // TemplateChart returns a rendered version of the provided ChartSpec 'spec' by performing a "dry-run" install.
-func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
+func (c *HelmClient) TemplateChart(spec *ChartSpec, options *HelmTemplateOptions) ([]byte, error) {
 	client := action.NewInstall(c.ActionConfig)
 	mergeInstallOptions(spec, client)
 
@@ -458,8 +458,12 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 	client.ReleaseName = spec.ReleaseName
 	client.Replace = true // Skip the name check
 	client.ClientOnly = true
-	client.APIVersions = []string{}
 	client.IncludeCRDs = true
+
+	if options != nil {
+		client.KubeVersion = options.KubeVersion
+		client.APIVersions = options.APIVersions
+	}
 
 	// NameAndChart returns either the TemplateName if set,
 	// the ReleaseName if set or the generatedName as the first return value.

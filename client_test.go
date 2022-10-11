@@ -3,6 +3,7 @@ package helmclient
 import (
 	"bytes"
 	"context"
+	"helm.sh/helm/v3/pkg/chartutil"
 
 	"helm.sh/helm/v3/pkg/action"
 
@@ -257,7 +258,18 @@ func ExampleHelmClient_TemplateChart() {
   backupOperator: false`,
 	}
 
-	_, err := helmClient.TemplateChart(&chartSpec)
+	options := &HelmTemplateOptions{
+		KubeVersion: &chartutil.KubeVersion{
+			Version: "v1.23.10",
+			Major:   "1",
+			Minor:   "23",
+		},
+		APIVersions: []string{
+			"helm.sh/v1/Test",
+		},
+	}
+
+	_, err := helmClient.TemplateChart(&chartSpec, options)
 	if err != nil {
 		panic(err)
 	}

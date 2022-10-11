@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/repo"
 )
@@ -88,6 +89,12 @@ type HelmClient struct {
 type GenericHelmOptions struct {
 	PostRenderer postrender.PostRenderer
 	RollBack     RollBack
+}
+
+type HelmTemplateOptions struct {
+	KubeVersion *chartutil.KubeVersion
+	// APIVersions defined here will be appended to the default list helm provides
+	APIVersions chartutil.VersionSet
 }
 
 //go:generate controller-gen object paths="./..." output:dir=.
