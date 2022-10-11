@@ -391,10 +391,17 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 
 	upgradedRelease, upgradeErr := client.RunWithContext(ctx, spec.ReleaseName, helmChart, values)
 	if upgradeErr != nil {
+		resultErr := upgradeErr
 		if upgradedRelease == nil && opts != nil && opts.RollBack != nil {
-			return nil, opts.RollBack.RollbackRelease(spec)
+			rollbackErr := opts.RollBack.RollbackRelease(spec)
+			if rollbackErr != nil {
+				resultErr = fmt.Errorf("release failed, rollback failed: release error: %w, rollback error: %v", upgradeErr, rollbackErr)
+			} else {
+				resultErr = fmt.Errorf("release failed, rollback succeeded: release error: %w", upgradeErr)
+			}
 		}
-		return nil, upgradeErr
+		c.DebugLog("release upgrade failed: %s", resultErr)
+		return nil, resultErr
 	}
 
 	c.DebugLog("release upgraded successfully: %s/%s-%s", upgradedRelease.Name, upgradedRelease.Chart.Metadata.Name, upgradedRelease.Chart.Metadata.Version)
