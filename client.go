@@ -395,7 +395,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 		if upgradedRelease == nil && opts != nil && opts.RollBack != nil {
 			rollbackErr := opts.RollBack.RollbackRelease(spec)
 			if rollbackErr != nil {
-				resultErr = fmt.Errorf("release failed, rollback failed: release error: %w, rollback error: %w", upgradeErr, rollbackErr)
+				resultErr = fmt.Errorf("release failed, rollback failed: release error: %w, rollback error: %v", upgradeErr, rollbackErr)
 			} else {
 				resultErr = fmt.Errorf("release failed, rollback succeeded: release error: %w", upgradeErr)
 			}
