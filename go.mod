@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/golang/mock v1.6.0
 	github.com/spf13/pflag v1.0.5
-	helm.sh/helm/v3 v3.10.1
+	helm.sh/helm/v3 v3.10.3
 	k8s.io/apiextensions-apiserver v0.25.3
 	k8s.io/apimachinery v0.25.3
 	k8s.io/cli-runtime v0.25.3
