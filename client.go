@@ -278,6 +278,12 @@ func (c *HelmClient) UninstallReleaseByName(name string) error {
 	return c.uninstallReleaseByName(name)
 }
 
+// RunChartTests runs the suite of tests specified on the chart, identified by the release.
+// NB: Assumes that the namespace is correctly set on the client
+func (c *HelmClient) RunChartTests(releaseName string) (string, error) {
+	return c.runChartTests(releaseName)
+}
+
 // install installs the provided chart.
 // Optionally lints the chart if the linting flag is set.
 func (c *HelmClient) install(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {
@@ -817,6 +823,35 @@ func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
 	mergeRollbackOptions(spec, client)
 
 	return client.Run(spec.ReleaseName)
+}
+
+// runChartTests run the suite of tests defined on the specified chart
+
+func (c *HelmClient) runChartTests(releaseName string) (string, error) {
+
+	buf := new(bytes.Buffer)
+
+	client := action.NewReleaseTesting(c.ActionConfig)
+
+	if c.Settings.Namespace() == "" {
+		return "", fmt.Errorf("namespace not set")
+	}
+
+	client.Namespace = c.Settings.Namespace()
+
+	rel, err := client.Run(releaseName)
+
+	if err != nil && rel == nil {
+		return "", fmt.Errorf("unable to find release '%s': %v", releaseName, err)
+
+	}
+
+	if err := client.GetPodLogs(buf, rel); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+
 }
 
 // updateDependencies checks dependencies for given helmChart and updates dependencies with metadata if dependencyUpdate is true. returns updated HelmChart
