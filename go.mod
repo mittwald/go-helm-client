@@ -1,4 +1,4 @@
-module github.com/mittwald/go-helm-client
+module github.com/s4arkbyt3/go-helm-client
 
 go 1.19
 
