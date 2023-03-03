@@ -11,7 +11,7 @@ This library is build upon [`helm`](https://github.com/helm/helm) and available 
 ## Installation
 Install this library using `go get`:
 
-    $ go get github.com/mittwald/go-helm-client
+    $ go get github.com/s4arkbyt3/go-helm-client
 
 ## Usage
 Example usage of the client can be found in the [package examples](https://pkg.go.dev/github.com/mittwald/go-helm-client?tab=doc#pkg-examples).
