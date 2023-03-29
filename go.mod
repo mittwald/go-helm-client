@@ -7,7 +7,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	helm.sh/helm/v3 v3.10.3
 	k8s.io/apiextensions-apiserver v0.25.3
-	k8s.io/apimachinery v0.25.3
+	k8s.io/apimachinery v0.26.3
 	k8s.io/cli-runtime v0.25.3
 	k8s.io/client-go v0.25.3
 	sigs.k8s.io/yaml v1.3.0
@@ -107,12 +107,12 @@ require (
 	go.etcd.io/etcd/api/v3 v3.5.5 // indirect
 	go.starlark.net v0.0.0-20221020143700-22309ac47eac // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/term v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
@@ -127,7 +127,7 @@ require (
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	k8s.io/kubectl v0.25.3 // indirect
-	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85 // indirect
+	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
 	oras.land/oras-go v1.2.1 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/kustomize/api v0.12.1 // indirect
