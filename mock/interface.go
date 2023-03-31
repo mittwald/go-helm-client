@@ -53,6 +53,20 @@ func (mr *MockClientMockRecorder) AddOrUpdateChartRepo(entry interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrUpdateChartRepo", reflect.TypeOf((*MockClient)(nil).AddOrUpdateChartRepo), entry)
 }
 
+// AnnotationWithRelease mocks base method.
+func (m *MockClient) AnnotationWithRelease(rel *release.Release, key string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AnnotationWithRelease", rel, key)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// AnnotationWithRelease indicates an expected call of AnnotationWithRelease.
+func (mr *MockClientMockRecorder) AnnotationWithRelease(rel, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnnotationWithRelease", reflect.TypeOf((*MockClient)(nil).AnnotationWithRelease), rel, key)
+}
+
 // GetChart mocks base method.
 func (m *MockClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
 	m.ctrl.T.Helper()
@@ -171,6 +185,21 @@ func (m *MockClient) ListReleaseHistory(name string, max int) ([]*release.Releas
 func (mr *MockClientMockRecorder) ListReleaseHistory(name, max interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleaseHistory", reflect.TypeOf((*MockClient)(nil).ListReleaseHistory), name, max)
+}
+
+// ListReleases mocks base method.
+func (m *MockClient) ListReleases(opts helmclient.ListOptions) ([]*release.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListReleases", opts)
+	ret0, _ := ret[0].([]*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListReleases indicates an expected call of ListReleases.
+func (mr *MockClientMockRecorder) ListReleases(opts interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleases", reflect.TypeOf((*MockClient)(nil).ListReleases), opts)
 }
 
 // ListReleasesByStateMask mocks base method.

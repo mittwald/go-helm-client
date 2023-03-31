@@ -10,8 +10,6 @@ import (
 	"reflect"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -25,6 +23,7 @@ import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -244,13 +243,70 @@ func (c *HelmClient) UpgradeChart(ctx context.Context, spec *ChartSpec, opts *Ge
 // ListDeployedReleases lists all deployed releases.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
-	return c.listReleases(action.ListDeployed)
+	opts := ListOptions{
+		States: action.ListDeployed,
+	}
+	return c.listReleases(opts)
 }
 
 // ListReleasesByStateMask lists all releases filtered by stateMask.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) ListReleasesByStateMask(states action.ListStates) ([]*release.Release, error) {
-	return c.listReleases(states)
+	opts := ListOptions{
+		States: states,
+	}
+	return c.listReleases(opts)
+}
+
+// GatewayNameKey represents the gateway's name, is not same as helm release name.
+const gatewayNameKey = "gateway-name"
+
+// ListReleases lists all releases with options
+func (c *HelmClient) ListReleases(opts ListOptions) ([]*release.Release, error) {
+	rels, err := c.listReleases(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var rr []*release.Release
+
+	filterByName := false
+	filter := ""
+	if opts.Filter != "" {
+		filterByName = true
+		filter = strings.ToLower(opts.Filter)
+	}
+
+releaseLoop:
+	// TODO: go routine it ?
+	for _, rel := range rels {
+
+		if filterByName {
+			obj, ok := rel.Config[toAnnotationKey(gatewayNameKey)]
+			if !ok {
+				continue
+			}
+
+			if !strings.Contains(strings.ToLower(obj.(string)), filter) {
+				continue
+			}
+
+		}
+
+		for key, val := range opts.Selectors {
+			sel, ok := rel.Config[toAnnotationKey(key)]
+			if !ok {
+				continue releaseLoop
+			}
+
+			if strings.TrimSpace(sel.(string)) != val {
+				continue releaseLoop
+			}
+		}
+
+		rr = append(rr, rel)
+	}
+	return rr, nil
 }
 
 // GetReleaseValues returns the (optionally, all computed) values for the specified release.
@@ -261,6 +317,24 @@ func (c *HelmClient) GetReleaseValues(name string, allValues bool) (map[string]i
 // GetRelease returns a release specified by name.
 func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
+}
+
+func toAnnotationKey(origin string) string {
+	return fmt.Sprintf(fmtAnnoationKey, origin)
+}
+
+// AnnotationWithRelease get the annoation from release by key
+func (c *HelmClient) AnnotationWithRelease(rel *release.Release, key string) interface{} {
+	return rel.Config[toAnnotationKey(key)]
+}
+
+// Annotation  get the Annotation with the key from the release
+func (c *HelmClient) Annotation(releaseName, key string) interface{} {
+	r, err := c.getRelease(releaseName)
+	if err != nil {
+		return ""
+	}
+	return c.AnnotationWithRelease(r, key)
 }
 
 // RollbackRelease implicitly rolls back a release to the last revision.
@@ -771,7 +845,10 @@ func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPa
 // in a namespace or not based on the provided chart spec.
 // Note that this function only considers the contained chart name and namespace.
 func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
-	releases, err := c.listReleases(action.ListAll)
+	opts := ListOptions{
+		States: action.ListAll,
+	}
+	releases, err := c.listReleases(opts)
 	if err != nil {
 		return false, err
 	}
@@ -786,9 +863,14 @@ func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
 }
 
 // listReleases lists all releases that match the given state.
-func (c *HelmClient) listReleases(state action.ListStates) ([]*release.Release, error) {
+func (c *HelmClient) listReleases(opts ListOptions) ([]*release.Release, error) {
 	listClient := action.NewList(c.ActionConfig)
-	listClient.StateMask = state
+	listClient.StateMask = opts.States
+
+	// wait for https://github.com/helm/helm/pull/10533
+	//listClient.Selector = opts.Selector
+
+	//TODO: more options
 
 	return listClient.Run()
 }
