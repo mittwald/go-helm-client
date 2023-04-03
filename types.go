@@ -4,16 +4,16 @@ import (
 	"io"
 	"time"
 
-	"helm.sh/helm/v3/pkg/postrender"
-
-	"helm.sh/helm/v3/pkg/getter"
 	"k8s.io/client-go/rest"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/postrender"
 	"helm.sh/helm/v3/pkg/repo"
+
+	"github.com/mittwald/go-helm-client/values"
 )
 
 // Type Guard asserting that HelmClient satisfies the HelmClient interface.
