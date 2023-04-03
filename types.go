@@ -98,8 +98,6 @@ type HelmTemplateOptions struct {
 	APIVersions chartutil.VersionSet
 }
 
-//go:generate controller-gen object paths="./..." output:dir=.
-
 // ChartSpec defines the values of a helm chart
 // +kubebuilder:object:generate:=true
 type ChartSpec struct {

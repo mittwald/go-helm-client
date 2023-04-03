@@ -35,8 +35,6 @@ import (
 	"helm.sh/helm/v3/pkg/strvals"
 )
 
-//go:generate controller-gen object paths="./..." output:dir=.
-
 // Options captures the different ways to specify values
 // +kubebuilder:object:generate:=true
 type Options struct {

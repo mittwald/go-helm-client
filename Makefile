@@ -39,7 +39,8 @@ test: generate fmt vet ## Run tests.
 
 .PHONY: generate
 generate: controller-gen mockgen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	GOBIN=$(LOCALBIN) go generate ./...
+	$(MOCKGEN) -source=interface.go -package mockhelmclient -destination=./mock/interface.go -self_package=. Client
+	$(CONTROLLER_GEN) object paths="./..." output:dir=.
 
 ##@ Build Dependencies
 
