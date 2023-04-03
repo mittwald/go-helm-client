@@ -12,6 +12,7 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -113,6 +114,9 @@ type ChartSpec struct {
 	// and https://github.com/kubernetes-sigs/controller-tools/pull/317
 	// +optional
 	ValuesYaml string `json:"valuesYaml,omitempty"`
+	// Specify values similar to the cli
+	// +optional
+	ValuesOptions values.Options `json:"valuesOptions,omitempty"`
 	// Version of the chart release.
 	// +optional
 	Version string `json:"version,omitempty"`
