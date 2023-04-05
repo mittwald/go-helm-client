@@ -180,4 +180,10 @@ type ChartSpec struct {
 	// DryRun indicates whether to perform a dry run.
 	// +optional
 	DryRun bool `json:"dryRun,omitempty"`
+	// Description specifies a custom description for the uninstalled release
+	// +optional
+	Description string `json:"description,omitempty"`
+	// KeepHistory indicates whether to retain or purge the release history during uninstall
+	// +optional
+	KeepHistory bool `json:"keepHistory,omitempty"`
 }
