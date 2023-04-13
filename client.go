@@ -886,7 +886,7 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 }
 
 // mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client.
-func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback) {
+func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback, revision int) {
 	rollbackOptions.DisableHooks = chartSpec.DisableHooks
 	rollbackOptions.DryRun = chartSpec.DryRun
 	rollbackOptions.Timeout = chartSpec.Timeout
