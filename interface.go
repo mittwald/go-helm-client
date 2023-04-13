@@ -36,5 +36,5 @@ type Client interface {
 }
 
 type RollBack interface {
-	RollbackRelease(spec *ChartSpec) error
+	RollbackRelease(spec *ChartSpec, revision int) error
 }
