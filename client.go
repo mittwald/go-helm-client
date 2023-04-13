@@ -263,9 +263,9 @@ func (c *HelmClient) GetRelease(name string) (*release.Release, error) {
 	return c.getRelease(name)
 }
 
-// RollbackRelease implicitly rolls back a release to the last revision.
-func (c *HelmClient) RollbackRelease(spec *ChartSpec) error {
-	return c.rollbackRelease(spec)
+// RollbackRelease implicitly rolls back a release to the specified revision, or last if -1 is provided.
+func (c *HelmClient) RollbackRelease(spec *ChartSpec, revision int) error {
+	return c.rollbackRelease(spec, revision)
 }
 
 // UninstallRelease uninstalls the provided release
@@ -399,7 +399,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 	if upgradeErr != nil {
 		resultErr := upgradeErr
 		if upgradedRelease == nil && opts != nil && opts.RollBack != nil {
-			rollbackErr := opts.RollBack.RollbackRelease(spec)
+			rollbackErr := opts.RollBack.RollbackRelease(spec, -1)
 			if rollbackErr != nil {
 				resultErr = fmt.Errorf("release failed, rollback failed: release error: %w, rollback error: %v", upgradeErr, rollbackErr)
 			} else {
@@ -817,10 +817,10 @@ func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 }
 
 // rollbackRelease implicitly rolls back a release to the last revision.
-func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
+func (c *HelmClient) rollbackRelease(spec *ChartSpec, revision int) error {
 	client := action.NewRollback(c.ActionConfig)
 
-	mergeRollbackOptions(spec, client)
+	mergeRollbackOptions(spec, client, revision)
 
 	return client.Run(spec.ReleaseName)
 }
@@ -896,6 +896,9 @@ func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback
 	rollbackOptions.Recreate = chartSpec.Recreate
 	rollbackOptions.Wait = chartSpec.Wait
 	rollbackOptions.WaitForJobs = chartSpec.WaitForJobs
+        if revision > -1 {
+          rollbackOptions.Version = revision
+        }
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client.
