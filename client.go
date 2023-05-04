@@ -780,8 +780,16 @@ func (c *HelmClient) chartExists(spec *ChartSpec) (bool, error) {
 		return false, err
 	}
 
+	normalizeNamespace := func(s string) string {
+		if s == "" {
+			return "default"
+		}
+		return s
+	}
+	expectedNamespace := normalizeNamespace(spec.Namespace)
+
 	for _, r := range releases {
-		if r.Name == spec.ReleaseName && r.Namespace == spec.Namespace {
+		if r.Name == spec.ReleaseName && normalizeNamespace(r.Namespace) == expectedNamespace {
 			return true, nil
 		}
 	}
