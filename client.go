@@ -302,6 +302,9 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec, opts *Generic
 		if opts.PostRenderer != nil {
 			client.PostRenderer = opts.PostRenderer
 		}
+		if opts.ChartPathOptions != nil {
+			client.ChartPathOptions = *(opts.ChartPathOptions)
+		}
 	}
 
 	helmChart, chartPath, err := c.GetChart(spec.ChartName, &client.ChartPathOptions)
@@ -359,6 +362,9 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 	if opts != nil {
 		if opts.PostRenderer != nil {
 			client.PostRenderer = opts.PostRenderer
+		}
+		if opts.ChartPathOptions != nil {
+			client.ChartPathOptions = *(opts.ChartPathOptions)
 		}
 	}
 

@@ -88,8 +88,9 @@ type HelmClient struct {
 }
 
 type GenericHelmOptions struct {
-	PostRenderer postrender.PostRenderer
-	RollBack     RollBack
+	PostRenderer     postrender.PostRenderer
+	RollBack         RollBack
+	ChartPathOptions *action.ChartPathOptions
 }
 
 type HelmTemplateOptions struct {
