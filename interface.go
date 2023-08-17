@@ -20,6 +20,7 @@ type Client interface {
 	ListDeployedReleases() ([]*release.Release, error)
 	ListReleasesByStateMask(action.ListStates) ([]*release.Release, error)
 	GetRelease(name string) (*release.Release, error)
+	ReleaseStatus(name string, showResources bool, version int) (*release.Release, error)
 	// RollBack is an interface to abstract a rollback action.
 	RollBack
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)

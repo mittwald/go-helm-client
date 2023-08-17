@@ -188,6 +188,21 @@ func (mr *MockClientMockRecorder) ListReleasesByStateMask(arg0 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleasesByStateMask", reflect.TypeOf((*MockClient)(nil).ListReleasesByStateMask), arg0)
 }
 
+// ReleaseStatus mocks base method.
+func (m *MockClient) ReleaseStatus(name string, showResources bool, version int) (*release.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReleaseStatus", name, showResources, version)
+	ret0, _ := ret[0].(*release.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ReleaseStatus indicates an expected call of ReleaseStatus.
+func (mr *MockClientMockRecorder) ReleaseStatus(name, showResources, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleaseStatus", reflect.TypeOf((*MockClient)(nil).ReleaseStatus), name, showResources, version)
+}
+
 // RollbackRelease mocks base method.
 func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()

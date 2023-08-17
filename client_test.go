@@ -3,6 +3,7 @@ package helmclient
 import (
 	"bytes"
 	"context"
+
 	"helm.sh/helm/v3/pkg/chartutil"
 
 	"helm.sh/helm/v3/pkg/action"
@@ -324,6 +325,13 @@ func ExampleHelmClient_GetReleaseValues() {
 func ExampleHelmClient_GetRelease() {
 	// Get specific details of a deployed release.
 	if _, err := helmClient.GetRelease("etcd-operator"); err != nil {
+		panic(err)
+	}
+}
+
+func ExampleHelmClient_ReleaseStatus() {
+	// Get specific details of a deployed release.
+	if _, err := helmClient.releaseStatus("etcd-operator", true, 0); err != nil {
 		panic(err)
 	}
 }
