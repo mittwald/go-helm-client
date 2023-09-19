@@ -822,8 +822,8 @@ func (c *HelmClient) getRelease(name string) (*release.Release, error) {
 }
 
 // releaseStatus returns a release and it's status matching the provided 'name'.
-// showResources display the resources of the named release.
-// version display the status of the named release with revision.
+// showResources displays the resources of the named release.
+// version displays the status of the named release with revision.
 func (c *HelmClient) releaseStatus(name string, showResources bool, version int) (*release.Release, error) {
 	releaseStatusClient := action.NewStatus(c.ActionConfig)
 	releaseStatusClient.ShowResources = showResources
