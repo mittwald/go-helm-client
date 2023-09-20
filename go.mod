@@ -3,9 +3,9 @@ module github.com/mittwald/go-helm-client
 go 1.20
 
 require (
-	github.com/golang/mock v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
+	go.uber.org/mock v0.3.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	helm.sh/helm/v3 v3.13.2
 	k8s.io/apiextensions-apiserver v0.28.2
