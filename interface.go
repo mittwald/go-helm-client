@@ -30,6 +30,8 @@ type Client interface {
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
 	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
+	DependencyBuild(chartPath string, dependency *action.Dependency) error
+	Package(chartPath string, pkg *action.Package) (string, error)
 }
 
 type RollBack interface {

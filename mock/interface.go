@@ -53,6 +53,20 @@ func (mr *MockClientMockRecorder) AddOrUpdateChartRepo(entry interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrUpdateChartRepo", reflect.TypeOf((*MockClient)(nil).AddOrUpdateChartRepo), entry)
 }
 
+// DependencyBuild mocks base method.
+func (m *MockClient) DependencyBuild(chartPath string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DependencyBuild", chartPath)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DependencyBuild indicates an expected call of DependencyBuild.
+func (mr *MockClientMockRecorder) DependencyBuild(chartPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DependencyBuild", reflect.TypeOf((*MockClient)(nil).DependencyBuild), chartPath)
+}
+
 // GetChart mocks base method.
 func (m *MockClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
 	m.ctrl.T.Helper()
@@ -186,6 +200,20 @@ func (m *MockClient) ListReleasesByStateMask(arg0 action.ListStates) ([]*release
 func (mr *MockClientMockRecorder) ListReleasesByStateMask(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleasesByStateMask", reflect.TypeOf((*MockClient)(nil).ListReleasesByStateMask), arg0)
+}
+
+// Package mocks base method.
+func (m *MockClient) Package(chartPath string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Package", chartPath)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Package indicates an expected call of Package.
+func (mr *MockClientMockRecorder) Package(chartPath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Package", reflect.TypeOf((*MockClient)(nil).Package), chartPath)
 }
 
 // RollbackRelease mocks base method.

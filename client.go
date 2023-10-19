@@ -5,13 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/homedir"
 
+	"github.com/mittwald/go-helm-client/values"
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -278,6 +282,35 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 // UninstallReleaseByName uninstalls a release identified by the provided 'name'.
 func (c *HelmClient) UninstallReleaseByName(name string) error {
 	return c.uninstallReleaseByName(name)
+}
+
+// DependencyBuild builds the dependencies of the provided charts path. If dependency is nil, default parameters apply.
+// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
+func (c *HelmClient) DependencyBuild(chartPath string, dependency *action.Dependency) error {
+
+	if dependency == nil {
+		dependency = action.NewDependency()
+		dependency.Verify = false
+		dependency.Keyring = DefaultKeyring()
+		dependency.SkipRefresh = false
+	}
+
+	return buildDependencies(chartPath, dependency, c)
+}
+
+// Package packages a chart living in the given path. Returns the path to the packaged chart.
+// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
+func (c *HelmClient) Package(chartPath string, pkg *action.Package) (string, error) {
+
+	if pkg == nil {
+		pkg = action.NewPackage()
+		pkg.DependencyUpdate = true
+		pkg.RepositoryCache = c.Settings.RepositoryCache
+		pkg.RepositoryConfig = c.Settings.RepositoryConfig
+		pkg.Keyring = DefaultKeyring()
+	}
+
+	return pack(chartPath, pkg, c)
 }
 
 // install installs the provided chart.
@@ -854,6 +887,68 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 		}
 	}
 	return helmChart, nil
+}
+
+// buildDependencies builds dependencies for given helmChart. Returns built HelmChart
+func buildDependencies(chartPath string, dependency *action.Dependency, c *HelmClient) error {
+
+	man := &downloader.Manager{
+		ChartPath:        chartPath,
+		Keyring:          dependency.Keyring,
+		SkipUpdate:       false,
+		Getters:          c.Providers,
+		RegistryClient:   c.ActionConfig.RegistryClient,
+		RepositoryConfig: c.Settings.RepositoryConfig,
+		RepositoryCache:  c.Settings.RepositoryCache,
+		Out:              c.output,
+	}
+	if dependency.Verify {
+		man.Verify = downloader.VerifyIfPossible
+	}
+	if err := man.Build(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// package packages a chart given according to the supplied configuration. Returns the path to the packaged chart.
+func pack(chartPath string, pkg *action.Package, c *HelmClient) (string, error) {
+
+	valueOpts := &values.Options{}
+	p := getter.All(c.Settings)
+	vals, err := valueOpts.MergeValues(p)
+	if pkg.DependencyUpdate {
+		downloadManager := &downloader.Manager{
+			Out:              io.Discard,
+			ChartPath:        chartPath,
+			Keyring:          pkg.Keyring,
+			Getters:          p,
+			Debug:            c.Settings.Debug,
+			RegistryClient:   c.ActionConfig.RegistryClient,
+			RepositoryConfig: c.Settings.RepositoryConfig,
+			RepositoryCache:  c.Settings.RepositoryCache,
+		}
+
+		if err := downloadManager.Update(); err != nil {
+			return "", err
+		}
+	}
+	packPath, err := pkg.Run(chartPath, vals)
+	if err != nil {
+		return "", err
+	}
+
+	return packPath, nil
+}
+
+// DefaultKeyring returns the expanded path to the default keyring.
+// This function was copied from helm directly.
+func DefaultKeyring() string {
+	if v, ok := os.LookupEnv("GNUPGHOME"); ok {
+		return filepath.Join(v, "pubring.gpg")
+	}
+	return filepath.Join(homedir.HomeDir(), ".gnupg", "pubring.gpg")
 }
 
 // mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client.
