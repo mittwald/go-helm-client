@@ -285,7 +285,6 @@ func (c *HelmClient) UninstallReleaseByName(name string) error {
 }
 
 // DependencyBuild builds the dependencies of the provided charts path. If dependency is nil, default parameters apply.
-// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) DependencyBuild(chartPath string, dependency *action.Dependency) error {
 
 	if dependency == nil {
@@ -299,7 +298,6 @@ func (c *HelmClient) DependencyBuild(chartPath string, dependency *action.Depend
 }
 
 // Package packages a chart living in the given path. Returns the path to the packaged chart.
-// Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) Package(chartPath string, pkg *action.Package) (string, error) {
 
 	if pkg == nil {
