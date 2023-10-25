@@ -5,13 +5,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/homedir"
+	"k8s.io/helm/pkg/tlsutil"
 
+	"github.com/mittwald/go-helm-client/values"
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -278,6 +284,49 @@ func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
 // UninstallReleaseByName uninstalls a release identified by the provided 'name'.
 func (c *HelmClient) UninstallReleaseByName(name string) error {
 	return c.uninstallReleaseByName(name)
+}
+
+// DependencyBuild builds the dependencies of the provided charts path. If dependency is nil, default parameters apply.
+func (c *HelmClient) DependencyBuild(chartPath string, dependency *action.Dependency) error {
+
+	if dependency == nil {
+		dependency = action.NewDependency()
+		dependency.Verify = false
+		dependency.Keyring = DefaultKeyring()
+		dependency.SkipRefresh = false
+	}
+
+	return buildDependencies(chartPath, dependency, c)
+}
+
+// Package packages a chart living in the given path. Returns the path to the packaged chart.
+func (c *HelmClient) Package(chartPath string, pkg *action.Package) (string, error) {
+
+	if pkg == nil {
+		pkg = action.NewPackage()
+		pkg.DependencyUpdate = true
+		pkg.RepositoryCache = c.Settings.RepositoryCache
+		pkg.RepositoryConfig = c.Settings.RepositoryConfig
+		pkg.Keyring = DefaultKeyring()
+	}
+
+	return pack(chartPath, pkg, c)
+}
+
+func (c *HelmClient) Push(chartRef string, remote string, o RegistryPushOptions) error {
+	registryClient, err := c.newRegistryClient(o.certFile, o.keyFile, o.caFile, o.insecureSkipTLSverify, o.plainHTTP)
+	if err != nil {
+		return fmt.Errorf("missing registry client: %w", err)
+	}
+	o.cfg.RegistryClient = registryClient
+	client := action.NewPushWithOpts(action.WithPushConfig(o.cfg),
+		action.WithTLSClientConfig(o.certFile, o.keyFile, o.caFile),
+		action.WithInsecureSkipTLSVerify(o.insecureSkipTLSverify),
+		action.WithPlainHTTP(o.plainHTTP),
+		action.WithPushOptWriter(os.Stdout))
+	client.Settings = c.Settings
+	_, err = client.Run(chartRef, remote)
+	return err
 }
 
 // install installs the provided chart.
@@ -854,6 +903,143 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 		}
 	}
 	return helmChart, nil
+}
+
+// buildDependencies builds dependencies for given helmChart. Returns built HelmChart
+func buildDependencies(chartPath string, dependency *action.Dependency, c *HelmClient) error {
+
+	man := &downloader.Manager{
+		ChartPath:        chartPath,
+		Keyring:          dependency.Keyring,
+		SkipUpdate:       false,
+		Getters:          c.Providers,
+		RegistryClient:   c.ActionConfig.RegistryClient,
+		RepositoryConfig: c.Settings.RepositoryConfig,
+		RepositoryCache:  c.Settings.RepositoryCache,
+		Out:              c.output,
+	}
+	if dependency.Verify {
+		man.Verify = downloader.VerifyIfPossible
+	}
+	if err := man.Build(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// package packages a chart given according to the supplied configuration. Returns the path to the packaged chart.
+func pack(chartPath string, pkg *action.Package, c *HelmClient) (string, error) {
+
+	valueOpts := &values.Options{}
+	p := getter.All(c.Settings)
+	vals, err := valueOpts.MergeValues(p)
+	if pkg.DependencyUpdate {
+		downloadManager := &downloader.Manager{
+			Out:              io.Discard,
+			ChartPath:        chartPath,
+			Keyring:          pkg.Keyring,
+			Getters:          p,
+			Debug:            c.Settings.Debug,
+			RegistryClient:   c.ActionConfig.RegistryClient,
+			RepositoryConfig: c.Settings.RepositoryConfig,
+			RepositoryCache:  c.Settings.RepositoryCache,
+		}
+
+		if err := downloadManager.Update(); err != nil {
+			return "", err
+		}
+	}
+	packPath, err := pkg.Run(chartPath, vals)
+	if err != nil {
+		return "", err
+	}
+
+	return packPath, nil
+}
+
+// options to configure push action to push to a registry
+type RegistryPushOptions struct {
+	certFile              string
+	keyFile               string
+	caFile                string
+	insecureSkipTLSverify bool
+	plainHTTP             bool
+	cfg                   *action.Configuration
+}
+
+// generates new registry client. This code was copied from the official helm distro.
+func (c *HelmClient) newRegistryClient(certFile, keyFile, caFile string, insecureSkipTLSverify, plainHTTP bool) (*registry.Client, error) {
+	if certFile != "" && keyFile != "" || caFile != "" || insecureSkipTLSverify {
+		registryClient, err := c.newRegistryClientWithTLS(certFile, keyFile, caFile, insecureSkipTLSverify)
+		if err != nil {
+			return nil, err
+		}
+		return registryClient, nil
+	}
+	registryClient, err := c.newDefaultRegistryClient(plainHTTP)
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
+}
+
+// This code was copied from the official helm distro.
+func (c *HelmClient) newDefaultRegistryClient(plainHTTP bool) (*registry.Client, error) {
+
+	opts := []registry.ClientOption{
+		registry.ClientOptDebug(c.Settings.Debug),
+		registry.ClientOptEnableCache(true),
+		registry.ClientOptWriter(os.Stderr),
+		registry.ClientOptCredentialsFile(c.Settings.RegistryConfig),
+	}
+	if plainHTTP {
+		opts = append(opts, registry.ClientOptPlainHTTP())
+	}
+
+	// Create a new registry client
+	registryClient, err := registry.NewClient(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
+}
+
+// This code was copied from the official helm distro.
+func (c *HelmClient) newRegistryClientWithTLS(certFile, keyFile, caFile string, insecureSkipTLSverify bool) (*registry.Client, error) {
+	tlsConf, err := tlsutil.NewClientTLS(certFile, keyFile, caFile)
+	if err != nil {
+		return nil, fmt.Errorf("can't create TLS config for client: %s", err)
+	}
+	// Create a new registry client
+	registryClient, err := registry.NewClient(
+		registry.ClientOptDebug(c.Settings.Debug),
+		registry.ClientOptEnableCache(true),
+		registry.ClientOptWriter(os.Stderr),
+		registry.ClientOptCredentialsFile(c.Settings.RegistryConfig),
+		registry.ClientOptHTTPClient(&http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConf,
+			},
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
+}
+
+// DefaultKeyring returns the expanded path to the default keyring.
+// This function was copied from helm directly.
+func DefaultKeyring() string {
+	if v, ok := os.LookupEnv("GNUPGHOME"); ok {
+		return filepath.Join(v, "pubring.gpg")
+	}
+	return filepath.Join(homedir.HomeDir(), ".gnupg", "pubring.gpg")
 }
 
 // mergeRollbackOptions merges values of the provided chart to helm rollback options used by the client.
