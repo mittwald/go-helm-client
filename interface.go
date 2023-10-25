@@ -32,6 +32,7 @@ type Client interface {
 	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
 	DependencyBuild(chartPath string, dependency *action.Dependency) error
 	Package(chartPath string, pkg *action.Package) (string, error)
+	Push(chartRef string, remote string, pushOpts RegistryPushOptions) error
 }
 
 type RollBack interface {

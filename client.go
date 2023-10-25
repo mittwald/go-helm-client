@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -14,6 +15,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/homedir"
+	"k8s.io/helm/pkg/tlsutil"
 
 	"github.com/mittwald/go-helm-client/values"
 	"github.com/spf13/pflag"
@@ -309,6 +311,22 @@ func (c *HelmClient) Package(chartPath string, pkg *action.Package) (string, err
 	}
 
 	return pack(chartPath, pkg, c)
+}
+
+func (c *HelmClient) Push(chartRef string, remote string, o RegistryPushOptions) error {
+	registryClient, err := c.newRegistryClient(o.certFile, o.keyFile, o.caFile, o.insecureSkipTLSverify, o.plainHTTP)
+	if err != nil {
+		return fmt.Errorf("missing registry client: %w", err)
+	}
+	o.cfg.RegistryClient = registryClient
+	client := action.NewPushWithOpts(action.WithPushConfig(o.cfg),
+		action.WithTLSClientConfig(o.certFile, o.keyFile, o.caFile),
+		action.WithInsecureSkipTLSVerify(o.insecureSkipTLSverify),
+		action.WithPlainHTTP(o.plainHTTP),
+		action.WithPushOptWriter(os.Stdout))
+	client.Settings = c.Settings
+	_, err = client.Run(chartRef, remote)
+	return err
 }
 
 // install installs the provided chart.
@@ -938,6 +956,81 @@ func pack(chartPath string, pkg *action.Package, c *HelmClient) (string, error) 
 	}
 
 	return packPath, nil
+}
+
+// options to configure push action to push to a registry
+type RegistryPushOptions struct {
+	certFile              string
+	keyFile               string
+	caFile                string
+	insecureSkipTLSverify bool
+	plainHTTP             bool
+	cfg                   *action.Configuration
+}
+
+// generates new registry client. This code was copied from the official helm distro.
+func (c *HelmClient) newRegistryClient(certFile, keyFile, caFile string, insecureSkipTLSverify, plainHTTP bool) (*registry.Client, error) {
+	if certFile != "" && keyFile != "" || caFile != "" || insecureSkipTLSverify {
+		registryClient, err := c.newRegistryClientWithTLS(certFile, keyFile, caFile, insecureSkipTLSverify)
+		if err != nil {
+			return nil, err
+		}
+		return registryClient, nil
+	}
+	registryClient, err := c.newDefaultRegistryClient(plainHTTP)
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
+}
+
+// This code was copied from the official helm distro.
+func (c *HelmClient) newDefaultRegistryClient(plainHTTP bool) (*registry.Client, error) {
+
+	opts := []registry.ClientOption{
+		registry.ClientOptDebug(c.Settings.Debug),
+		registry.ClientOptEnableCache(true),
+		registry.ClientOptWriter(os.Stderr),
+		registry.ClientOptCredentialsFile(c.Settings.RegistryConfig),
+	}
+	if plainHTTP {
+		opts = append(opts, registry.ClientOptPlainHTTP())
+	}
+
+	// Create a new registry client
+	registryClient, err := registry.NewClient(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
+}
+
+// This code was copied from the official helm distro.
+func (c *HelmClient) newRegistryClientWithTLS(certFile, keyFile, caFile string, insecureSkipTLSverify bool) (*registry.Client, error) {
+	tlsConf, err := tlsutil.NewClientTLS(certFile, keyFile, caFile)
+	if err != nil {
+		return nil, fmt.Errorf("can't create TLS config for client: %s", err)
+	}
+	// Create a new registry client
+	registryClient, err := registry.NewClient(
+		registry.ClientOptDebug(c.Settings.Debug),
+		registry.ClientOptEnableCache(true),
+		registry.ClientOptWriter(os.Stderr),
+		registry.ClientOptCredentialsFile(c.Settings.RegistryConfig),
+		registry.ClientOptHTTPClient(&http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConf,
+			},
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return registryClient, nil
 }
 
 // DefaultKeyring returns the expanded path to the default keyring.
