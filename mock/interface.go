@@ -202,6 +202,21 @@ func (mr *MockClientMockRecorder) RollbackRelease(spec interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackRelease", reflect.TypeOf((*MockClient)(nil).RollbackRelease), spec)
 }
 
+// RunChartTests mocks base method.
+func (m *MockClient) RunChartTests(releaseName string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunChartTests", releaseName)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RunChartTests indicates an expected call of RunChartTests.
+func (mr *MockClientMockRecorder) RunChartTests(releaseName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunChartTests", reflect.TypeOf((*MockClient)(nil).RunChartTests), releaseName)
+}
+
 // SetDebugLog mocks base method.
 func (m *MockClient) SetDebugLog(debugLog action.DebugLog) {
 	m.ctrl.T.Helper()
