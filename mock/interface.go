@@ -85,18 +85,18 @@ func (mr *MockClientMockRecorder) GetRelease(name interface{}) *gomock.Call {
 }
 
 // GetReleaseValues mocks base method.
-func (m *MockClient) GetReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
+func (m *MockClient) GetReleaseValues(name string, allValues bool, version int) (map[string]interface{}, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetReleaseValues", name, allValues)
+	ret := m.ctrl.Call(m, "GetReleaseValues", name, allValues, version)
 	ret0, _ := ret[0].(map[string]interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetReleaseValues indicates an expected call of GetReleaseValues.
-func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) GetReleaseValues(name, allValues, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseValues", reflect.TypeOf((*MockClient)(nil).GetReleaseValues), name, allValues)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseValues", reflect.TypeOf((*MockClient)(nil).GetReleaseValues), name, allValues, version)
 }
 
 // InstallChart mocks base method.

@@ -51,9 +51,9 @@ func TestHelmClientInterfaces(t *testing.T) {
 
 	t.Run("GetReleaseValues", func(t *testing.T) {
 		m := make(map[string]interface{})
-		mockClient.EXPECT().GetReleaseValues(mockedRelease.Name, true).
+		mockClient.EXPECT().GetReleaseValues(mockedRelease.Name, true, 0).
 			Return(m, nil)
-		rv, err := mockClient.GetReleaseValues(mockedRelease.Name, true)
+		rv, err := mockClient.GetReleaseValues(mockedRelease.Name, true, 0)
 		if err != nil {
 			panic(err)
 		}

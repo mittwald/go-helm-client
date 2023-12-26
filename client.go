@@ -258,8 +258,8 @@ func (c *HelmClient) ListReleasesByStateMask(states action.ListStates) ([]*relea
 }
 
 // GetReleaseValues returns the (optionally, all computed) values for the specified release.
-func (c *HelmClient) GetReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
-	return c.getReleaseValues(name, allValues)
+func (c *HelmClient) GetReleaseValues(name string, allValues bool, version int) (map[string]interface{}, error) {
+	return c.getReleaseValues(name, allValues, version)
 }
 
 // GetRelease returns a release specified by name.
@@ -825,10 +825,12 @@ func (c *HelmClient) listReleases(state action.ListStates) ([]*release.Release, 
 
 // getReleaseValues returns the values for the provided release 'name'.
 // If allValues = true is specified, all computed values are returned.
-func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
+// version '0' means the latest reversion.
+func (c *HelmClient) getReleaseValues(name string, allValues bool, version int) (map[string]interface{}, error) {
 	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
 
 	getReleaseValuesClient.AllValues = allValues
+	getReleaseValuesClient.Version = version
 
 	return getReleaseValuesClient.Run(name)
 }
