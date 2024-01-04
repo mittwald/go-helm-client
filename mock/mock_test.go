@@ -3,7 +3,8 @@ package mockhelmclient
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
+
 	"helm.sh/helm/v3/pkg/release"
 )
 
