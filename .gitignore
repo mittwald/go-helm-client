@@ -15,6 +15,9 @@ cache/
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# go modules vendor directory
+/vendor
+
 # editor and IDE paraphernalia
 .idea
 *.swp
