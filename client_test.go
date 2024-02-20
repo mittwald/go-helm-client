@@ -3,6 +3,7 @@ package helmclient
 import (
 	"bytes"
 	"context"
+
 	"helm.sh/helm/v3/pkg/chartutil"
 
 	"helm.sh/helm/v3/pkg/action"
@@ -196,7 +197,7 @@ type customRollBack struct {
 
 var _ RollBack = &customRollBack{}
 
-func (c customRollBack) RollbackRelease(spec *ChartSpec) error {
+func (c customRollBack) RollbackRelease(spec *ChartSpec, revision int) error {
 	client := action.NewRollback(c.ActionConfig)
 
 	client.Force = true
@@ -338,7 +339,7 @@ func ExampleHelmClient_RollbackRelease() {
 	}
 
 	// Rollback to the previous version of the release.
-	if err := helmClient.RollbackRelease(&chartSpec); err != nil {
+	if err := helmClient.RollbackRelease(&chartSpec, 1); err != nil {
 		return
 	}
 }

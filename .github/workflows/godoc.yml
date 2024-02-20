@@ -13,4 +13,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test successful curl against module mirror
-        run : test $(curl -s -o /dev/null -w "%{http_code}"  ${GOPROXY}/github.com/mittwald/go-helm-client/@v/${GITHUB_REF/refs\/tags\//}.info) -eq 200
+        run : test $(curl -s -o /dev/null -w "%{http_code}"  ${GOPROXY}/github.com/s4arkbyt3/go-helm-client/@v/${GITHUB_REF/refs\/tags\//}.info) -eq 200
