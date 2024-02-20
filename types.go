@@ -13,7 +13,7 @@ import (
 	"helm.sh/helm/v3/pkg/postrender"
 	"helm.sh/helm/v3/pkg/repo"
 
-	"github.com/mittwald/go-helm-client/values"
+	"github.com/s4arkbyt3/go-helm-client/values"
 )
 
 // Type Guard asserting that HelmClient satisfies the HelmClient interface.
