@@ -26,7 +26,7 @@ This library includes a mock client [mock/interface_mock.go](mock/interface.go) 
 
 Example usage of the mocked client can be found in [mock/mock_test.go](mock/mock_test.go).
 
-If you made changes to [interface.go](./interface.go), you should issue the `go generate ./...` command to trigger code generation.
+If you made changes to [interface.go](./interface.go), you should issue the `make generate` command to trigger code generation.
 
 ## Documentation
 For more specific documentation, please refer to the [godoc](https://pkg.go.dev/github.com/mittwald/go-helm-client/) of this library.

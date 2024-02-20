@@ -289,8 +289,9 @@ func ExampleHelmClient_UninstallRelease() {
 		ReleaseName: "etcd-operator",
 		ChartName:   "stable/etcd-operator",
 		Namespace:   "default",
-		UpgradeCRDs: true,
 		Wait:        true,
+		DryRun:      true,
+		KeepHistory: true,
 	}
 
 	// Uninstall the chart release.

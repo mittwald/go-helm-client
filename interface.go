@@ -3,13 +3,14 @@ package helmclient
 import (
 	"context"
 
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 )
-
-//go:generate mockgen -source=interface.go -package mockhelmclient -destination=./mock/interface.go -self_package=. Client
 
 // Client holds the method signatures for a Helm client.
 // NOTE: This is an interface to allow for mocking in tests.
@@ -25,6 +26,8 @@ type Client interface {
 	// RollBack is an interface to abstract a rollback action.
 	RollBack
 	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
+	GetSettings() *cli.EnvSettings
+	GetProviders() getter.Providers
 	UninstallRelease(spec *ChartSpec) error
 	UninstallReleaseByName(name string) error
 	TemplateChart(spec *ChartSpec, options *HelmTemplateOptions) ([]byte, error)

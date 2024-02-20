@@ -7,20 +7,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Set up Go 1.19
-        uses: actions/setup-go@v2
+      - name: Set up Go 1.21
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.19
+          go-version: "1.21"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run go generate
         run: |
           set -x
-          apt-get -y update && apt-get -y install git
-          go install github.com/golang/mock/mockgen@v1.6.0
-          go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0 
-          go generate ./...
+          sudo apt-get -y update && sudo apt-get -y install git
+          make generate
           git diff | cat
           git status --porcelain=v1
           test $(git status --porcelain=v1 | wc -l) -eq 0
@@ -32,15 +30,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.19' ]
+        go: [ '1.21' ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
 
       - name: Run unit tests
-        run: go test ./...
+        run: make test
