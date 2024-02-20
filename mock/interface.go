@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	go_helm_client "github.com/s4arkbyt3/go-helm-client"
+	helmclient "github.com/s4arkbyt3/go-helm-client"
 	gomock "go.uber.org/mock/gomock"
 	action "helm.sh/helm/v3/pkg/action"
 	chart "helm.sh/helm/v3/pkg/chart"
@@ -135,7 +135,7 @@ func (mr *MockClientMockRecorder) GetSettings() *gomock.Call {
 }
 
 // InstallChart mocks base method.
-func (m *MockClient) InstallChart(ctx context.Context, spec *go_helm_client.ChartSpec, opts *go_helm_client.GenericHelmOptions) (*release.Release, error) {
+func (m *MockClient) InstallChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InstallChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
@@ -150,7 +150,7 @@ func (mr *MockClientMockRecorder) InstallChart(ctx, spec, opts any) *gomock.Call
 }
 
 // InstallOrUpgradeChart mocks base method.
-func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *go_helm_client.ChartSpec, opts *go_helm_client.GenericHelmOptions) (*release.Release, error) {
+func (m *MockClient) InstallOrUpgradeChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InstallOrUpgradeChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
@@ -165,7 +165,7 @@ func (mr *MockClientMockRecorder) InstallOrUpgradeChart(ctx, spec, opts any) *go
 }
 
 // LintChart mocks base method.
-func (m *MockClient) LintChart(spec *go_helm_client.ChartSpec) error {
+func (m *MockClient) LintChart(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LintChart", spec)
 	ret0, _ := ret[0].(error)
@@ -224,7 +224,7 @@ func (mr *MockClientMockRecorder) ListReleasesByStateMask(arg0 any) *gomock.Call
 }
 
 // RollbackRelease mocks base method.
-func (m *MockClient) RollbackRelease(spec *go_helm_client.ChartSpec, revision int) error {
+func (m *MockClient) RollbackRelease(spec *helmclient.ChartSpec, revision int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RollbackRelease", spec, revision)
 	ret0, _ := ret[0].(error)
@@ -265,7 +265,7 @@ func (mr *MockClientMockRecorder) SetDebugLog(debugLog any) *gomock.Call {
 }
 
 // TemplateChart mocks base method.
-func (m *MockClient) TemplateChart(spec *go_helm_client.ChartSpec, options *go_helm_client.HelmTemplateOptions) ([]byte, error) {
+func (m *MockClient) TemplateChart(spec *helmclient.ChartSpec, options *helmclient.HelmTemplateOptions) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TemplateChart", spec, options)
 	ret0, _ := ret[0].([]byte)
@@ -280,7 +280,7 @@ func (mr *MockClientMockRecorder) TemplateChart(spec, options any) *gomock.Call 
 }
 
 // UninstallRelease mocks base method.
-func (m *MockClient) UninstallRelease(spec *go_helm_client.ChartSpec) error {
+func (m *MockClient) UninstallRelease(spec *helmclient.ChartSpec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UninstallRelease", spec)
 	ret0, _ := ret[0].(error)
@@ -322,7 +322,7 @@ func (mr *MockClientMockRecorder) UpdateChartRepos() *gomock.Call {
 }
 
 // UpgradeChart mocks base method.
-func (m *MockClient) UpgradeChart(ctx context.Context, spec *go_helm_client.ChartSpec, opts *go_helm_client.GenericHelmOptions) (*release.Release, error) {
+func (m *MockClient) UpgradeChart(ctx context.Context, spec *helmclient.ChartSpec, opts *helmclient.GenericHelmOptions) (*release.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpgradeChart", ctx, spec, opts)
 	ret0, _ := ret[0].(*release.Release)
@@ -360,7 +360,7 @@ func (m *MockRollBack) EXPECT() *MockRollBackMockRecorder {
 }
 
 // RollbackRelease mocks base method.
-func (m *MockRollBack) RollbackRelease(spec *go_helm_client.ChartSpec, revision int) error {
+func (m *MockRollBack) RollbackRelease(spec *helmclient.ChartSpec, revision int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RollbackRelease", spec, revision)
 	ret0, _ := ret[0].(error)

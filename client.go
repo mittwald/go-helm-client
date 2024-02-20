@@ -784,24 +784,24 @@ func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPa
 // RunTests runs the tests that were deployed with the release provided. It returns true
 // if all the tests ran successfully and false in all other cases.
 // NOTE: error = nil implies that all tests ran to either success or failure.
-func (c *HelmClient) RunChartTests(releaseName string) (bool, error) {
+// func (c *HelmClient) RunChartTests(releaseName string) (bool, error) {
 
-	client := action.NewReleaseTesting(c.ActionConfig)
+// 	client := action.NewReleaseTesting(c.ActionConfig)
 
-	if c.Settings.Namespace() == "" {
-		return false, fmt.Errorf("namespace not set")
-	}
+// 	if c.Settings.Namespace() == "" {
+// 		return false, fmt.Errorf("namespace not set")
+// 	}
 
-	client.Namespace = c.Settings.Namespace()
+// 	client.Namespace = c.Settings.Namespace()
 
-	rel, err := client.Run(releaseName)
-	if err != nil && rel == nil {
-		return false, fmt.Errorf("unable to find release '%s': %v", releaseName, err)
-	}
+// 	rel, err := client.Run(releaseName)
+// 	if err != nil && rel == nil {
+// 		return false, fmt.Errorf("unable to find release '%s': %v", releaseName, err)
+// 	}
 
-	// Check that there are no test failures
-	return checkReleaseForTestFailure(rel) == false, nil
-}
+// 	// Check that there are no test failures
+// 	return checkReleaseForTestFailure(rel) == false, nil
+// }
 
 // chartExists checks whether a chart is already installed
 // in a namespace or not based on the provided chart spec.
@@ -943,9 +943,9 @@ func mergeRollbackOptions(chartSpec *ChartSpec, rollbackOptions *action.Rollback
 	rollbackOptions.Recreate = chartSpec.Recreate
 	rollbackOptions.Wait = chartSpec.Wait
 	rollbackOptions.WaitForJobs = chartSpec.WaitForJobs
-        if revision > -1 {
-          rollbackOptions.Version = revision
-        }
+	if revision > -1 {
+		rollbackOptions.Version = revision
+	}
 }
 
 // mergeInstallOptions merges values of the provided chart to helm install options used by the client.
