@@ -58,7 +58,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions, restClientOpts ...RES
 		return nil, fmt.Errorf("kubeconfig missing")
 	}
 
-	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil, restClientOpts...)
+	clientGetter := NewRESTClientGetter(options.Namespace, options.KubeConfig, nil, options.KubeCacheDir, restClientOpts...)
 
 	if options.KubeContext != "" {
 		settings.KubeContext = options.KubeContext
@@ -71,7 +71,7 @@ func NewClientFromKubeConf(options *KubeConfClientOptions, restClientOpts ...RES
 func NewClientFromRestConf(options *RestConfClientOptions) (Client, error) {
 	settings := cli.New()
 
-	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig)
+	clientGetter := NewRESTClientGetter(options.Namespace, nil, options.RestConfig, options.KubeCacheDir)
 
 	return newClient(options.Options, clientGetter, settings)
 }
