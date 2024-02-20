@@ -1,9 +1,13 @@
 package helmclient
 
 import (
+	"fmt"
+	"time"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/discovery/cached/memory"
+
+	"k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
@@ -12,12 +16,13 @@ import (
 // NewRESTClientGetter returns a RESTClientGetter using the provided 'namespace', 'kubeConfig' and 'restConfig'.
 //
 // source: https://github.com/helm/helm/issues/6910#issuecomment-601277026
-func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config, opts ...RESTClientOption) *RESTClientGetter {
+func NewRESTClientGetter(namespace string, kubeConfig []byte, restConfig *rest.Config, kubeCacheDir string, opts ...RESTClientOption) *RESTClientGetter {
 	return &RESTClientGetter{
-		namespace:  namespace,
-		kubeConfig: kubeConfig,
-		restConfig: restConfig,
-		opts:       opts,
+		namespace:    namespace,
+		kubeConfig:   kubeConfig,
+		kubeCacheDir: kubeCacheDir,
+		restConfig:   restConfig,
+		opts:         opts,
 	}
 }
 
@@ -47,8 +52,10 @@ func (c *RESTClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterfa
 		fn(config)
 	}
 
-	discoveryClient, _ := discovery.NewDiscoveryClientForConfig(config)
-	return memory.NewMemCacheClient(discoveryClient), nil
+	discoveryCacheDir := fmt.Sprintf("%s/discovery", c.kubeCacheDir)
+	httpCacheDir := fmt.Sprintf("%s/http", c.kubeCacheDir)
+
+	return disk.NewCachedDiscoveryClientForConfig(config, discoveryCacheDir, httpCacheDir, time.Minute * 10)
 }
 
 func (c *RESTClientGetter) ToRESTMapper() (meta.RESTMapper, error) {

@@ -42,6 +42,7 @@ type Options struct {
 	DebugLog         action.DebugLog
 	RegistryConfig   string
 	Output           io.Writer
+	KubeCacheDir     string
 }
 
 // RESTClientOption is a function that can be used to set the RESTClientOptions of a HelmClient.
@@ -67,9 +68,10 @@ func Burst(v int) RESTClientOption {
 
 // RESTClientGetter defines the values of a helm REST client.
 type RESTClientGetter struct {
-	namespace  string
-	kubeConfig []byte
-	restConfig *rest.Config
+	namespace    string
+	kubeConfig   []byte
+	restConfig   *rest.Config
+	kubeCacheDir string
 
 	opts []RESTClientOption
 }
