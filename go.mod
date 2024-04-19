@@ -1,4 +1,4 @@
-module github.com/mittwald/go-helm-client
+module github.com/Travelgate-Operations/go-helm-client
 
 go 1.21
 

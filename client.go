@@ -218,6 +218,16 @@ func (c *HelmClient) UpdateChartRepos() error {
 	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
 }
 
+// Login authenticate in private repositories
+func (c *HelmClient) Login(entry *repo.Entry) error {
+	registryLogin := action.NewRegistryLogin(c.ActionConfig)
+	registryOpts := action.WithInsecure(true)
+
+	err := registryLogin.Run(os.Stdout, entry.URL, entry.Username, entry.Password, registryOpts)
+
+	return err
+}
+
 // InstallOrUpgradeChart installs or upgrades the provided chart and returns the corresponding release.
 // Namespace and other context is provided via the helmclient.Options struct when instantiating a client.
 func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec, opts *GenericHelmOptions) (*release.Release, error) {

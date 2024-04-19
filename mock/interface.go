@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	helmclient "github.com/mittwald/go-helm-client"
+	helmclient "github.com/Travelgate-Operations/go-helm-client"
 	gomock "go.uber.org/mock/gomock"
 	action "helm.sh/helm/v3/pkg/action"
 	chart "helm.sh/helm/v3/pkg/chart"

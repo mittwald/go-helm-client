@@ -5,7 +5,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"sigs.k8s.io/yaml"
 
-	"github.com/mittwald/go-helm-client/values"
+	"github.com/Travelgate-Operations/go-helm-client/values"
 )
 
 // GetValuesMap returns the merged mapped out values of a chart,
