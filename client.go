@@ -457,12 +457,15 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 
 	result := client.Run([]string{chartPath}, values)
 
+	friendlyErr := ""
 	for _, err := range result.Errors {
+		friendlyErr = fmt.Sprintf("%s%s|", friendlyErr, err.Error())
+
 		c.DebugLog("Error %s", err)
 	}
 
 	if len(result.Errors) > 0 {
-		return fmt.Errorf("linting for chartpath %q failed", chartPath)
+		return fmt.Errorf("linting for chartpath %q failed: %s", chartPath, strings.Trim(friendlyErr, "|"))
 	}
 
 	return nil
