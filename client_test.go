@@ -329,6 +329,13 @@ func ExampleHelmClient_GetRelease() {
 	}
 }
 
+func ExampleHelmClient_ReleaseStatus() {
+	// Get specific details of a deployed release.
+	if _, err := helmClient.releaseStatus("etcd-operator", true, 0); err != nil {
+		panic(err)
+	}
+}
+
 func ExampleHelmClient_RollbackRelease() {
 	// Define the released chart to be installed
 	chartSpec := ChartSpec{
