@@ -286,12 +286,13 @@ func ExampleHelmClient_UpdateChartRepos() {
 func ExampleHelmClient_UninstallRelease() {
 	// Define the released chart to be installed.
 	chartSpec := ChartSpec{
-		ReleaseName: "etcd-operator",
-		ChartName:   "stable/etcd-operator",
-		Namespace:   "default",
-		Wait:        true,
-		DryRun:      true,
-		KeepHistory: true,
+		ReleaseName:    "etcd-operator",
+		ChartName:      "stable/etcd-operator",
+		Namespace:      "default",
+		Wait:           true,
+		DryRun:         true,
+		KeepHistory:    true,
+		IgnoreNotFound: true,
 	}
 
 	// Uninstall the chart release.
