@@ -85,6 +85,13 @@ type HelmClient struct {
 	linting      bool
 	output       io.Writer
 	DebugLog     action.DebugLog
+
+	ChartLoader
+}
+
+type DefaultChartLoader struct {
+	Settings *cli.EnvSettings
+	debugLog action.DebugLog
 }
 
 func (c *HelmClient) GetSettings() *cli.EnvSettings {

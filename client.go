@@ -115,7 +115,8 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 	}
 	actionConfig.RegistryClient = registryClient
 
-	return &HelmClient{
+	var client *HelmClient
+	client = &HelmClient{
 		Settings:     settings,
 		Providers:    getter.All(settings),
 		storage:      &storage,
@@ -123,7 +124,13 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		linting:      options.Linting,
 		DebugLog:     debugLog,
 		output:       options.Output,
-	}, nil
+		ChartLoader: &DefaultChartLoader{
+			Settings: settings,
+			debugLog: func(format string, v ...interface{}) { client.DebugLog(format, v...) },
+		},
+	}
+
+	return client, nil
 }
 
 // setEnvSettings sets the client's environment settings based on the provided client configuration.
@@ -756,25 +763,6 @@ func (c *HelmClient) upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, 
 	return nil
 }
 
-// GetChart returns a chart matching the provided chart name and options.
-func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
-	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
-	if err != nil {
-		return nil, "", err
-	}
-
-	helmChart, err := loader.Load(chartPath)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if helmChart.Metadata.Deprecated {
-		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
-	}
-
-	return helmChart, chartPath, err
-}
-
 // RunTests runs the tests that were deployed with the release provided. It returns true
 // if all the tests ran successfully and false in all other cases.
 // NOTE: error = nil implies that all tests ran to either success or failure.
@@ -847,6 +835,25 @@ func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
 	mergeRollbackOptions(spec, client)
 
 	return client.Run(spec.ReleaseName)
+}
+
+// GetChart returns a chart matching the provided chart name and options.
+func (l *DefaultChartLoader) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+	chartPath, err := chartPathOptions.LocateChart(chartName, l.Settings)
+	if err != nil {
+		return nil, "", err
+	}
+
+	helmChart, err := loader.Load(chartPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if helmChart.Metadata.Deprecated {
+		l.debugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+	}
+
+	return helmChart, chartPath, err
 }
 
 // updateDependencies checks dependencies for given helmChart and updates dependencies with metadata if dependencyUpdate is true. returns updated HelmChart
