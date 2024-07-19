@@ -41,6 +41,7 @@ type Options struct {
 	Linting          bool
 	DebugLog         action.DebugLog
 	RegistryConfig   string
+	HelmDriver       string
 	Output           io.Writer
 }
 

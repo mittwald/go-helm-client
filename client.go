@@ -95,11 +95,17 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		options.Output = os.Stdout
 	}
 
+	helmDriver := options.HelmDriver
+	if helmDriverEnv := os.Getenv("HELM_DRIVER"); helmDriverEnv != "" {
+		// Environment variable overrides
+		helmDriver = helmDriverEnv
+	}
+
 	actionConfig := new(action.Configuration)
 	err = actionConfig.Init(
 		clientGetter,
 		settings.Namespace(),
-		os.Getenv("HELM_DRIVER"),
+		helmDriver,
 		debugLog,
 	)
 	if err != nil {
