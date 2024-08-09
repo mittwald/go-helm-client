@@ -8,9 +8,8 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
-
-	"golang.org/x/exp/slices"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
