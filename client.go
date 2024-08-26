@@ -513,7 +513,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec, options *HelmTemplateOptions
 		return nil, err
 	}
 
-	values, err := spec.GetValuesMap(helmClient.Providers)
+	values, err := spec.GetValuesMap(c.Providers)
 	if err != nil {
 		return nil, err
 	}
