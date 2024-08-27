@@ -89,9 +89,10 @@ type HelmClient struct {
 	ChartLoader
 }
 
+// DefaultChartLoader is the default implementation of the ChartLoader interface.
 type DefaultChartLoader struct {
 	Settings *cli.EnvSettings
-	debugLog action.DebugLog
+	DebugLog action.DebugLog
 }
 
 func (c *HelmClient) GetSettings() *cli.EnvSettings {

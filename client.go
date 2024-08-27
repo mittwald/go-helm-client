@@ -114,8 +114,7 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 	}
 	actionConfig.RegistryClient = registryClient
 
-	var client *HelmClient
-	client = &HelmClient{
+	return &HelmClient{
 		Settings:     settings,
 		Providers:    getter.All(settings),
 		storage:      &storage,
@@ -125,11 +124,9 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		output:       options.Output,
 		ChartLoader: &DefaultChartLoader{
 			Settings: settings,
-			debugLog: func(format string, v ...interface{}) { client.DebugLog(format, v...) },
+			DebugLog: debugLog,
 		},
-	}
-
-	return client, nil
+	}, nil
 }
 
 // setEnvSettings sets the client's environment settings based on the provided client configuration.
@@ -845,7 +842,7 @@ func (l *DefaultChartLoader) GetChart(chartName string, chartPathOptions *action
 	}
 
 	if helmChart.Metadata.Deprecated {
-		l.debugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+		l.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
 	}
 
 	return helmChart, chartPath, err
