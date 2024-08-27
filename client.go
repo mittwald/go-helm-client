@@ -962,4 +962,5 @@ func mergeUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions 
 	uninstallReleaseOptions.Description = chartSpec.Description
 	uninstallReleaseOptions.KeepHistory = chartSpec.KeepHistory
 	uninstallReleaseOptions.Wait = chartSpec.Wait
+	uninstallReleaseOptions.IgnoreNotFound = chartSpec.IgnoreNotFound
 }

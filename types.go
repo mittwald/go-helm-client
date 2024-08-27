@@ -202,4 +202,7 @@ type ChartSpec struct {
 	// Labels specifies a set of labels to be applied to the release
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
+	// IgnoreNotFound indicates whether to ignore a missing release during uninstall
+	// +optional
+	IgnoreNotFound bool `json:"ignoreNotFound,omitempty"`
 }
