@@ -122,6 +122,10 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		linting:      options.Linting,
 		DebugLog:     debugLog,
 		output:       options.Output,
+		ChartLoader: &DefaultChartLoader{
+			Settings: settings,
+			DebugLog: debugLog,
+		},
 	}, nil
 }
 
@@ -323,8 +327,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec, opts *Generic
 		return nil, err
 	}
 
-	p := getter.All(c.Settings)
-	values, err := spec.GetValuesMap(p)
+	values, err := spec.GetValuesMap(c.Providers)
 	if err != nil {
 		return nil, err
 	}
@@ -373,8 +376,7 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec, opts *Generic
 		return nil, err
 	}
 
-	p := getter.All(c.Settings)
-	values, err := spec.GetValuesMap(p)
+	values, err := spec.GetValuesMap(c.Providers)
 	if err != nil {
 		return nil, err
 	}
@@ -507,8 +509,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec, options *HelmTemplateOptions
 		return nil, err
 	}
 
-	p := getter.All(c.Settings)
-	values, err := spec.GetValuesMap(p)
+	values, err := spec.GetValuesMap(c.Providers)
 	if err != nil {
 		return nil, err
 	}
@@ -544,8 +545,7 @@ func (c *HelmClient) LintChart(spec *ChartSpec) error {
 		return err
 	}
 
-	p := getter.All(c.Settings)
-	values, err := spec.GetValuesMap(p)
+	values, err := spec.GetValuesMap(c.Providers)
 	if err != nil {
 		return err
 	}
@@ -755,25 +755,6 @@ func (c *HelmClient) upgradeCRDV1(ctx context.Context, cl *clientset.Clientset, 
 	return nil
 }
 
-// GetChart returns a chart matching the provided chart name and options.
-func (c *HelmClient) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
-	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
-	if err != nil {
-		return nil, "", err
-	}
-
-	helmChart, err := loader.Load(chartPath)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if helmChart.Metadata.Deprecated {
-		c.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
-	}
-
-	return helmChart, chartPath, err
-}
-
 // RunTests runs the tests that were deployed with the release provided. It returns true
 // if all the tests ran successfully and false in all other cases.
 // NOTE: error = nil implies that all tests ran to either success or failure.
@@ -846,6 +827,25 @@ func (c *HelmClient) rollbackRelease(spec *ChartSpec) error {
 	mergeRollbackOptions(spec, client)
 
 	return client.Run(spec.ReleaseName)
+}
+
+// GetChart returns a chart matching the provided chart name and options.
+func (l *DefaultChartLoader) GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+	chartPath, err := chartPathOptions.LocateChart(chartName, l.Settings)
+	if err != nil {
+		return nil, "", err
+	}
+
+	helmChart, err := loader.Load(chartPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if helmChart.Metadata.Deprecated {
+		l.DebugLog("WARNING: This chart (%q) is deprecated", helmChart.Metadata.Name)
+	}
+
+	return helmChart, chartPath, err
 }
 
 // updateDependencies checks dependencies for given helmChart and updates dependencies with metadata if dependencyUpdate is true. returns updated HelmChart
