@@ -62,4 +62,16 @@ func TestHelmClientInterfaces(t *testing.T) {
 			panic(err)
 		}
 	})
+
+	t.Run("ReleaseStatus", func(t *testing.T) {
+		mockClient.EXPECT().ReleaseStatus(mockedRelease.Name, true, 0).
+			Return(&release.Release{Name: mockedRelease.Name}, nil)
+		r, err := mockClient.ReleaseStatus(mockedRelease.Name, true, 0)
+		if err != nil {
+			panic(err)
+		}
+		if r == nil {
+			panic(err)
+		}
+	})
 }
