@@ -115,6 +115,7 @@ func ExampleHelmClient_InstallOrUpgradeChart() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	// Install a chart release.
@@ -132,6 +133,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useChartDirectory() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
@@ -147,6 +149,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useLocalChartArchive() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
@@ -162,6 +165,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useURL() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	if _, err := helmClient.InstallOrUpgradeChart(context.Background(), &chartSpec, nil); err != nil {
@@ -177,6 +181,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useDefaultRollBackStrategy() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	// Use the default rollback strategy offer by HelmClient (revert to the previous version).
@@ -213,6 +218,7 @@ func ExampleHelmClient_InstallOrUpgradeChart_useCustomRollBackStrategy() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	// Use a custom rollback strategy (customRollBack needs to implement RollBack).
@@ -237,6 +243,7 @@ func ExampleHelmClient_LintChart() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 		ValuesYaml: `deployments:
   etcdOperator: true
   backupOperator: false`,
@@ -254,6 +261,7 @@ func ExampleHelmClient_TemplateChart() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 		ValuesYaml: `deployments:
   etcdOperator: true
   backupOperator: false`,
@@ -290,6 +298,7 @@ func ExampleHelmClient_UninstallRelease() {
 		ChartName:   "stable/etcd-operator",
 		Namespace:   "default",
 		Wait:        true,
+		Timeout:     32 * time.Second,
 		DryRun:      true,
 		KeepHistory: true,
 	}
@@ -337,6 +346,7 @@ func ExampleHelmClient_RollbackRelease() {
 		Namespace:   "default",
 		UpgradeCRDs: true,
 		Wait:        true,
+		Timeout:     32 * time.Second,
 	}
 
 	// Rollback to the previous version of the release.
