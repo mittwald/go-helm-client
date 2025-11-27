@@ -34,8 +34,13 @@ type Client interface {
 	LintChart(spec *ChartSpec) error
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
-	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
+	// ChartLoader is an interface to abstract loading charts.
+	ChartLoader
 	RunChartTests(releaseName string) (bool, error)
+}
+
+type ChartLoader interface {
+	GetChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error)
 }
 
 type RollBack interface {
