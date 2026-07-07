@@ -3,9 +3,11 @@ package helmclient
 import (
 	"bytes"
 	"context"
+	"testing"
 	"time"
 
 	"helm.sh/helm/v4/pkg/chart/common"
+	"helm.sh/helm/v4/pkg/cli"
 	"helm.sh/helm/v4/pkg/kube"
 
 	"helm.sh/helm/v4/pkg/action"
@@ -21,6 +23,7 @@ func ExampleNew() {
 		Namespace:        "default", // Change this to the namespace you wish the client to operate in.
 		RepositoryCache:  "/tmp/.helmcache",
 		RepositoryConfig: "/tmp/.helmrepo",
+		ContentCache:     "/tmp/.helmcontent",
 		Debug:            true,
 		Linting:          true,
 		DebugLog:         func(format string, v ...interface{}) {},
@@ -40,6 +43,7 @@ func ExampleNewClientFromRestConf() {
 			Namespace:        "default", // Change this to the namespace you wish the client to operate in.
 			RepositoryCache:  "/tmp/.helmcache",
 			RepositoryConfig: "/tmp/.helmrepo",
+			ContentCache:     "/tmp/.helmcontent",
 			Debug:            true,
 			Linting:          true, // Change this to false if you don't want linting.
 			DebugLog: func(format string, v ...interface{}) {
@@ -62,6 +66,7 @@ func ExampleNewClientFromKubeConf() {
 			Namespace:        "default", // Change this to the namespace you wish to install the chart in.
 			RepositoryCache:  "/tmp/.helmcache",
 			RepositoryConfig: "/tmp/.helmrepo",
+			ContentCache:     "/tmp/.helmcontent",
 			Debug:            true,
 			Linting:          true, // Change this to false if you don't want linting.
 			DebugLog: func(format string, v ...interface{}) {
@@ -77,6 +82,42 @@ func ExampleNewClientFromKubeConf() {
 		panic(err)
 	}
 	_ = helmClient
+}
+
+func TestSetEnvSettingsSetsDefaultContentCacheForNilOptions(t *testing.T) {
+	testDefaultContentCache(t, nil)
+}
+
+func TestSetEnvSettingsSetsDefaultContentCacheForEmptyOptions(t *testing.T) {
+	testDefaultContentCache(t, &Options{})
+}
+
+func testDefaultContentCache(t *testing.T, options *Options) {
+	t.Helper()
+
+	settings := cli.New()
+	if err := setEnvSettings(&options, settings); err != nil {
+		t.Fatal(err)
+	}
+
+	if settings.ContentCache != defaultContentCachePath {
+		t.Fatalf("expected default content cache %q, got %q", defaultContentCachePath, settings.ContentCache)
+	}
+}
+
+func TestSetEnvSettingsAllowsContentCacheOverride(t *testing.T) {
+	settings := cli.New()
+	options := &Options{
+		ContentCache: "/custom/content-cache",
+	}
+
+	if err := setEnvSettings(&options, settings); err != nil {
+		t.Fatal(err)
+	}
+
+	if settings.ContentCache != options.ContentCache {
+		t.Fatalf("expected content cache %q, got %q", options.ContentCache, settings.ContentCache)
+	}
 }
 
 func ExampleHelmClient_AddOrUpdateChartRepo_public() {

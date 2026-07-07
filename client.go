@@ -37,6 +37,7 @@ var storage = repo.File{}
 
 const (
 	defaultCachePath            = "/tmp/.helmcache"
+	defaultContentCachePath     = "/tmp/.helmcontent"
 	defaultRepositoryConfigPath = "/tmp/.helmrepo"
 )
 
@@ -132,6 +133,7 @@ func setEnvSettings(ppOptions **Options, settings *cli.EnvSettings) error {
 		*ppOptions = &Options{
 			RepositoryConfig: defaultRepositoryConfigPath,
 			RepositoryCache:  defaultCachePath,
+			ContentCache:     defaultContentCachePath,
 			Linting:          true,
 		}
 	}
@@ -157,8 +159,13 @@ func setEnvSettings(ppOptions **Options, settings *cli.EnvSettings) error {
 		options.RepositoryCache = defaultCachePath
 	}
 
+	if options.ContentCache == "" {
+		options.ContentCache = defaultContentCachePath
+	}
+
 	settings.RepositoryCache = options.RepositoryCache
 	settings.RepositoryConfig = options.RepositoryConfig
+	settings.ContentCache = options.ContentCache
 	settings.Debug = options.Debug
 
 	if options.RegistryConfig != "" {
@@ -893,6 +900,7 @@ func updateDependencies(helmChart *chart.Chart, chartPathOptions *action.ChartPa
 					Getters:          c.Providers,
 					RepositoryConfig: c.Settings.RepositoryConfig,
 					RepositoryCache:  c.Settings.RepositoryCache,
+					ContentCache:     c.Settings.ContentCache,
 					Out:              c.output,
 				}
 				if err := man.Update(); err != nil {

@@ -39,6 +39,7 @@ type Options struct {
 	Namespace        string
 	RepositoryConfig string
 	RepositoryCache  string
+	ContentCache     string
 	Debug            bool
 	Linting          bool
 	DebugLog         DebugLog
